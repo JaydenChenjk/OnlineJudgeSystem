@@ -1,0 +1,18 @@
+{
+  "python": {
+    "name": "python",
+    "file_ext": ".py",
+    "compile_cmd": "",
+    "run_cmd": "python main.py",
+    "time_limit": 3.0,
+    "memory_limit": 128
+  },
+  "cpp": {
+    "name": "cpp",
+    "file_ext": ".cpp",
+    "compile_cmd": "g++ -o main main.cpp -std=c++11",
+    "run_cmd": "./main",
+    "time_limit": 3.0,
+    "memory_limit": 128
+  }
+}

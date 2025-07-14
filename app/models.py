@@ -78,15 +78,47 @@ class UserListResponse(BaseModel):
     users: List[UserInfo]
 
 
+class Language(BaseModel):
+    name: str = Field(..., description="语言名称")
+    file_ext: str = Field(..., description="文件扩展名")
+    compile_cmd: Optional[str] = Field("", description="编译命令")
+    run_cmd: str = Field(..., description="运行命令")
+    time_limit: Optional[float] = Field(3.0, description="默认时间限制")
+    memory_limit: Optional[int] = Field(128, description="默认内存限制")
+
+
+class Submission(BaseModel):
+    submission_id: str = Field(..., description="提交ID")
+    user_id: str = Field(..., description="用户ID")
+    problem_id: str = Field(..., description="题目ID")
+    language: str = Field(..., description="编程语言")
+    code: str = Field(..., description="代码")
+    status: str = Field("pending", description="评测状态")
+    score: int = Field(0, description="得分")
+    counts: int = Field(0, description="总分")
+    submit_time: str = Field(..., description="提交时间")
+
+
+class SubmissionCreate(BaseModel):
+    problem_id: str = Field(..., description="题目ID")
+    language: str = Field(..., description="编程语言")
+    code: str = Field(..., description="代码")
+
+
 # 数据存储类
 class DataStore:
     def __init__(self):
         self.users_file = "users.json"
         self.sessions_file = "sessions.json"
+        self.languages_file = "languages.json"
+        self.submissions_file = "submissions.json"
         self.users = {}
         self.sessions = {}
+        self.languages = {}
+        self.submissions = {}
         self.load_data()
         self.ensure_admin_exists()
+        self.ensure_default_languages()
     
     def load_data(self):
         """从文件加载数据"""
@@ -103,6 +135,20 @@ class DataStore:
                     self.sessions = json.load(f)
             except:
                 self.sessions = {}
+        
+        if os.path.exists(self.languages_file):
+            try:
+                with open(self.languages_file, 'r', encoding='utf-8') as f:
+                    self.languages = json.load(f)
+            except:
+                self.languages = {}
+        
+        if os.path.exists(self.submissions_file):
+            try:
+                with open(self.submissions_file, 'r', encoding='utf-8') as f:
+                    self.submissions = json.load(f)
+            except:
+                self.submissions = {}
     
     def save_data(self):
         """保存数据到文件"""
@@ -111,6 +157,12 @@ class DataStore:
         
         with open(self.sessions_file, 'w', encoding='utf-8') as f:
             json.dump(self.sessions, f, ensure_ascii=False, indent=2)
+        
+        with open(self.languages_file, 'w', encoding='utf-8') as f:
+            json.dump(self.languages, f, ensure_ascii=False, indent=2)
+        
+        with open(self.submissions_file, 'w', encoding='utf-8') as f:
+            json.dump(self.submissions, f, ensure_ascii=False, indent=2)
     
     def ensure_admin_exists(self):
         """确保管理员账户存在"""
@@ -128,6 +180,19 @@ class DataStore:
                 "join_time": now,
                 "submit_count": 0,
                 "resolve_count": 0
+            }
+            self.save_data()
+    
+    def ensure_default_languages(self):
+        """确保默认语言存在"""
+        if "python" not in self.languages:
+            self.languages["python"] = {
+                "name": "python",
+                "file_ext": ".py",
+                "compile_cmd": "",
+                "run_cmd": "python main.py",
+                "time_limit": 3.0,
+                "memory_limit": 128
             }
             self.save_data()
     
@@ -229,12 +294,86 @@ class DataStore:
             del self.sessions[session_id]
             self.save_data()
     
+    def register_language(self, language_data: dict):
+        """注册新语言"""
+        name = language_data["name"]
+        if name in self.languages:
+            raise ValueError("语言已存在")
+        
+        self.languages[name] = language_data
+        self.save_data()
+    
+    def get_languages(self) -> dict:
+        """获取所有语言"""
+        return {"name": list(self.languages.keys())}
+    
+    def get_language(self, name: str) -> Optional[dict]:
+        """获取指定语言"""
+        return self.languages.get(name)
+    
+    def create_submission(self, user_id: str, problem_id: str, language: str, code: str) -> str:
+        """创建提交"""
+        submission_id = str(uuid.uuid4())
+        now = datetime.now().isoformat()
+        
+        self.submissions[submission_id] = {
+            "submission_id": submission_id,
+            "user_id": user_id,
+            "problem_id": problem_id,
+            "language": language,
+            "code": code,
+            "status": "pending",
+            "score": 0,
+            "counts": 0,
+            "submit_time": now
+        }
+        
+        # 更新用户提交次数
+        if user_id in self.users:
+            self.users[user_id]["submit_count"] += 1
+        
+        self.save_data()
+        return submission_id
+    
+    def get_submission(self, submission_id: str) -> Optional[dict]:
+        """获取提交信息"""
+        return self.submissions.get(submission_id)
+    
+    def update_submission(self, submission_id: str, **kwargs):
+        """更新提交信息"""
+        if submission_id in self.submissions:
+            self.submissions[submission_id].update(kwargs)
+            self.save_data()
+    
+    def get_submissions(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:
+        """获取提交列表"""
+        all_submissions = list(self.submissions.values())
+        
+        # 过滤
+        if user_id:
+            all_submissions = [s for s in all_submissions if s["user_id"] == user_id]
+        if problem_id:
+            all_submissions = [s for s in all_submissions if s["problem_id"] == problem_id]
+        
+        total = len(all_submissions)
+        start = (page - 1) * page_size
+        end = start + page_size
+        submissions_page = all_submissions[start:end]
+        
+        return {
+            "total": total,
+            "submissions": submissions_page
+        }
+    
     def reset_system(self):
         """重置系统"""
         self.users = {}
         self.sessions = {}
+        self.languages = {}
+        self.submissions = {}
         self.save_data()
         self.ensure_admin_exists()
+        self.ensure_default_languages()
 
 
 # 全局数据存储实例
