@@ -1,0 +1,33 @@
+{
+  "id": "test_sum_5205",
+  "title": "两数之和",
+  "description": "输入两个整数，输出它们的和。",
+  "input_description": "输入为一行，包含两个整数。",
+  "output_description": "输出这两个整数的和。",
+  "samples": [
+    {
+      "input": "1 2",
+      "output": "3"
+    }
+  ],
+  "constraints": "|a|,|b| <= 10^9",
+  "testcases": [
+    {
+      "input": "1 2",
+      "output": "3"
+    },
+    {
+      "input": "10 20",
+      "output": "30"
+    }
+  ],
+  "hint": "有负数哦！",
+  "source": "测试来源",
+  "tags": [
+    "基础题"
+  ],
+  "time_limit": 1.0,
+  "memory_limit": 128,
+  "author": "测试作者",
+  "difficulty": "入门"
+}
