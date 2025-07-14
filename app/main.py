@@ -4,13 +4,13 @@ from fastapi.exceptions import RequestValidationError
 import uvicorn
 
 from .auth import SessionMiddleware
-from .routers import auth, users, problems, admin, languages, submissions, logs
+from .routers import auth, users, problems, admin, languages, submissions, logs, import_export
 
 app = FastAPI(title="Online Judge System", version="1.0.0")
 
 # 添加Session中间件
 app.add_middleware(SessionMiddleware)
-
+    
 
 @app.get("/")
 async def welcome():
@@ -25,6 +25,7 @@ app.include_router(admin.router)
 app.include_router(languages.router)
 app.include_router(submissions.router)
 app.include_router(logs.router)
+app.include_router(import_export.router)
 
 
 # 全局异常处理
