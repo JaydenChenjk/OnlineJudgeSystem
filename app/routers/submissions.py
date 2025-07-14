@@ -101,11 +101,12 @@ async def get_submission_result(submission_id: str, request: Request):
 
 @router.get("/", summary="获取提交列表")
 async def get_submissions_list(
+    request: Request,
     user_id: Optional[str] = Query(None),
     problem_id: Optional[str] = Query(None),
+    judge_status: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1),
-    request: Request = None
+    page_size: int = Query(10, ge=1)
 ):
     """获取提交列表（需要登录）"""
     current_user = require_auth(request)  # 需要登录
@@ -125,7 +126,7 @@ async def get_submissions_list(
         )
     
     try:
-        result = data_store.get_submissions(user_id, problem_id, page, page_size)
+        result = data_store.get_submissions(user_id, problem_id, judge_status, page, page_size)
         
         # 转换提交信息格式
         submissions = []

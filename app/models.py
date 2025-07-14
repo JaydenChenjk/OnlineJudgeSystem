@@ -345,7 +345,7 @@ class DataStore:
             self.submissions[submission_id].update(kwargs)
             self.save_data()
     
-    def get_submissions(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:
+    def get_submissions(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, status: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:
         """获取提交列表"""
         all_submissions = list(self.submissions.values())
         
@@ -354,6 +354,8 @@ class DataStore:
             all_submissions = [s for s in all_submissions if s["user_id"] == user_id]
         if problem_id:
             all_submissions = [s for s in all_submissions if s["problem_id"] == problem_id]
+        if status:
+            all_submissions = [s for s in all_submissions if s["status"] == status]
         
         total = len(all_submissions)
         start = (page - 1) * page_size
