@@ -7,5 +7,41 @@
     "join_time": "2025-07-14",
     "submit_count": 0,
     "resolve_count": 0
+  },
+  "f49bf9d2-d252-439e-87b9-21e46abee117": {
+    "user_id": "f49bf9d2-d252-439e-87b9-21e46abee117",
+    "username": "testuser",
+    "password_hash": "$2b$12$J6l6/Sy9yCwMsAAS6VggGO8ffqvOLIqElwoChxqpo1w33Zrid9Ix6",
+    "role": "user",
+    "join_time": "2025-07-14",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "6c951841-6be0-46f9-a9f4-f290073cbbdb": {
+    "user_id": "6c951841-6be0-46f9-a9f4-f290073cbbdb",
+    "username": "new_admin_82eb4aeb",
+    "password_hash": "$2b$12$gep2pXr7ff67SxOL11Oq4uJ6.nP9/l2nSejRWQMxVyRqW/DWy9pZu",
+    "role": "admin",
+    "join_time": "2025-07-14",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "a6ec4278-a935-4562-86eb-ed6dd5fd462c": {
+    "user_id": "a6ec4278-a935-4562-86eb-ed6dd5fd462c",
+    "username": "another_admin_871d5656",
+    "password_hash": "$2b$12$1xfLCC9IqKbQkRKUZnDQ9Of9WlKpHkB5kHRZ.46p1HSwgGbXlr5du",
+    "role": "admin",
+    "join_time": "2025-07-14",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "24591e41-facc-4482-9c5b-b19edc5c420e": {
+    "user_id": "24591e41-facc-4482-9c5b-b19edc5c420e",
+    "username": "test_user_ea2af791",
+    "password_hash": "$2b$12$9/TB1V.KF/bvYTkGfsnO3OOo.jpjG5zQGdLG.bQlEGPljdpud5ili",
+    "role": "user",
+    "join_time": "2025-07-14",
+    "submit_count": 0,
+    "resolve_count": 0
   }
 }
