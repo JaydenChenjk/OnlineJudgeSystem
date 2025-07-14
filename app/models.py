@@ -105,6 +105,43 @@ class SubmissionCreate(BaseModel):
     code: str = Field(..., description="代码")
 
 
+class TestCaseResult(BaseModel):
+    test_case_id: int = Field(..., description="测试用例ID")
+    status: str = Field(..., description="评测状态")
+    time_used: float = Field(0, description="运行时间")
+    memory_used: int = Field(0, description="内存使用")
+    input_data: str = Field(..., description="输入数据")
+    expected_output: str = Field(..., description="期望输出")
+    actual_output: str = Field("", description="实际输出")
+
+
+class SubmissionLog(BaseModel):
+    submission_id: str = Field(..., description="提交ID")
+    user_id: str = Field(..., description="用户ID")
+    problem_id: str = Field(..., description="题目ID")
+    language: str = Field(..., description="编程语言")
+    code: str = Field(..., description="代码")
+    score: int = Field(0, description="得分")
+    counts: int = Field(0, description="总分")
+    test_cases: List[TestCaseResult] = Field(..., description="测试用例结果")
+    submit_time: str = Field(..., description="提交时间")
+
+
+class LogVisibilityConfig(BaseModel):
+    public_cases: bool = Field(False, description="是否允许公开测试用例")
+
+
+class AccessLog(BaseModel):
+    log_id: str = Field(..., description="访问日志ID")
+    user_id: str = Field(..., description="用户ID")
+    username: str = Field(..., description="用户名")
+    action: str = Field(..., description="操作类型")
+    resource_id: str = Field(..., description="资源ID")
+    resource_type: str = Field(..., description="资源类型")
+    access_time: str = Field(..., description="访问时间")
+    ip_address: str = Field("", description="IP地址")
+
+
 # 数据存储类
 class DataStore:
     def __init__(self):
@@ -112,10 +149,16 @@ class DataStore:
         self.sessions_file = "sessions.json"
         self.languages_file = "languages.json"
         self.submissions_file = "submissions.json"
+        self.submission_logs_file = "submission_logs.json"
+        self.problem_visibility_file = "problem_visibility.json"
+        self.access_logs_file = "access_logs.json"
         self.users = {}
         self.sessions = {}
         self.languages = {}
         self.submissions = {}
+        self.submission_logs = {}
+        self.problem_visibility = {}
+        self.access_logs = {}
         self.load_data()
         self.ensure_admin_exists()
         self.ensure_default_languages()
@@ -149,6 +192,27 @@ class DataStore:
                     self.submissions = json.load(f)
             except:
                 self.submissions = {}
+        
+        if os.path.exists(self.submission_logs_file):
+            try:
+                with open(self.submission_logs_file, 'r', encoding='utf-8') as f:
+                    self.submission_logs = json.load(f)
+            except:
+                self.submission_logs = {}
+        
+        if os.path.exists(self.problem_visibility_file):
+            try:
+                with open(self.problem_visibility_file, 'r', encoding='utf-8') as f:
+                    self.problem_visibility = json.load(f)
+            except:
+                self.problem_visibility = {}
+        
+        if os.path.exists(self.access_logs_file):
+            try:
+                with open(self.access_logs_file, 'r', encoding='utf-8') as f:
+                    self.access_logs = json.load(f)
+            except:
+                self.access_logs = {}
     
     def save_data(self):
         """保存数据到文件"""
@@ -163,6 +227,15 @@ class DataStore:
         
         with open(self.submissions_file, 'w', encoding='utf-8') as f:
             json.dump(self.submissions, f, ensure_ascii=False, indent=2)
+        
+        with open(self.submission_logs_file, 'w', encoding='utf-8') as f:
+            json.dump(self.submission_logs, f, ensure_ascii=False, indent=2)
+        
+        with open(self.problem_visibility_file, 'w', encoding='utf-8') as f:
+            json.dump(self.problem_visibility, f, ensure_ascii=False, indent=2)
+        
+        with open(self.access_logs_file, 'w', encoding='utf-8') as f:
+            json.dump(self.access_logs, f, ensure_ascii=False, indent=2)
     
     def ensure_admin_exists(self):
         """确保管理员账户存在"""
@@ -345,7 +418,7 @@ class DataStore:
             self.submissions[submission_id].update(kwargs)
             self.save_data()
     
-    def get_submissions(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, status: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:
+    def get_submissions(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, judge_status: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:
         """获取提交列表"""
         all_submissions = list(self.submissions.values())
         
@@ -354,8 +427,8 @@ class DataStore:
             all_submissions = [s for s in all_submissions if s["user_id"] == user_id]
         if problem_id:
             all_submissions = [s for s in all_submissions if s["problem_id"] == problem_id]
-        if status:
-            all_submissions = [s for s in all_submissions if s["status"] == status]
+        if judge_status:
+            all_submissions = [s for s in all_submissions if s["status"] == judge_status]
         
         total = len(all_submissions)
         start = (page - 1) * page_size
@@ -367,12 +440,70 @@ class DataStore:
             "submissions": submissions_page
         }
     
+    def save_submission_log(self, submission_id: str, log_data: dict):
+        """保存提交日志"""
+        self.submission_logs[submission_id] = log_data
+        self.save_data()
+    
+    def get_submission_log(self, submission_id: str) -> Optional[dict]:
+        """获取提交日志"""
+        return self.submission_logs.get(submission_id)
+    
+    def set_problem_visibility(self, problem_id: str, public_cases: bool):
+        """设置题目日志可见性"""
+        self.problem_visibility[problem_id] = {"public_cases": public_cases}
+        self.save_data()
+    
+    def get_problem_visibility(self, problem_id: str) -> dict:
+        """获取题目日志可见性"""
+        return self.problem_visibility.get(problem_id, {"public_cases": False})
+    
+    def log_access(self, user_id: str, username: str, action: str, resource_id: str, resource_type: str, ip_address: str = ""):
+        """记录访问日志"""
+        log_id = str(uuid.uuid4())
+        now = datetime.now().isoformat()
+        
+        self.access_logs[log_id] = {
+            "log_id": log_id,
+            "user_id": user_id,
+            "username": username,
+            "action": action,
+            "resource_id": resource_id,
+            "resource_type": resource_type,
+            "access_time": now,
+            "ip_address": ip_address
+        }
+        self.save_data()
+    
+    def get_access_logs(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:
+        """获取访问日志"""
+        all_logs = list(self.access_logs.values())
+        
+        # 过滤
+        if user_id:
+            all_logs = [log for log in all_logs if log["user_id"] == user_id]
+        if problem_id:
+            all_logs = [log for log in all_logs if log["resource_type"] == "problem" and log["resource_id"] == problem_id]
+        
+        total = len(all_logs)
+        start = (page - 1) * page_size
+        end = start + page_size
+        logs_page = all_logs[start:end]
+        
+        return {
+            "total": total,
+            "logs": logs_page
+        }
+    
     def reset_system(self):
         """重置系统"""
         self.users = {}
         self.sessions = {}
         self.languages = {}
         self.submissions = {}
+        self.submission_logs = {}
+        self.problem_visibility = {}
+        self.access_logs = {}
         self.save_data()
         self.ensure_admin_exists()
         self.ensure_default_languages()

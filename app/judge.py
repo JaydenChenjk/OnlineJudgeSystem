@@ -17,10 +17,13 @@ class JudgeResult:
 
 
 class TestCaseResult:
-    def __init__(self, status: str, time_used: float = 0, memory_used: int = 0):
+    def __init__(self, status: str, time_used: float = 0, memory_used: int = 0, input_data: str = "", expected_output: str = "", actual_output: str = ""):
         self.status = status  # AC, WA, TLE, MLE, RE, CE, UNK
         self.time_used = time_used
         self.memory_used = memory_used
+        self.input_data = input_data
+        self.expected_output = expected_output
+        self.actual_output = actual_output
 
 
 class Judge:
@@ -51,6 +54,7 @@ class Judge:
             total_score = 0
             total_counts = len(test_cases) * 10  # 每个测试点10分
             
+            test_case_results = []
             for i, test_case in enumerate(test_cases):
                 result = await self._judge_test_case(
                     submission["code"],
@@ -59,11 +63,36 @@ class Judge:
                     test_case.input,
                     test_case.output,
                     problem.time_limit or language.get("time_limit", 3.0),
-                    problem.memory_limit or language.get("memory_limit", 128)
+                    problem.memory_limit or language.get("memory_limit", 128),
+                    i
                 )
+                
+                test_case_results.append({
+                    "test_case_id": i,
+                    "status": result.status,
+                    "time_used": result.time_used,
+                    "memory_used": result.memory_used,
+                    "input_data": result.input_data,
+                    "expected_output": result.expected_output,
+                    "actual_output": result.actual_output
+                })
                 
                 if result.status == "AC":
                     total_score += 10
+            
+            # 保存评测日志
+            log_data = {
+                "submission_id": submission_id,
+                "user_id": submission["user_id"],
+                "problem_id": submission["problem_id"],
+                "language": submission["language"],
+                "code": submission["code"],
+                "score": total_score,
+                "counts": total_counts,
+                "test_cases": test_case_results,
+                "submit_time": submission["submit_time"]
+            }
+            data_store.save_submission_log(submission_id, log_data)
             
             # 更新提交结果
             data_store.update_submission(
@@ -98,7 +127,8 @@ class Judge:
         input_data: str,
         expected_output: str,
         time_limit: float,
-        memory_limit: int
+        memory_limit: int,
+        test_case_id: int
     ) -> TestCaseResult:
         """评测单个测试点"""
         try:
@@ -121,7 +151,11 @@ class Judge:
                 )
                 if compile_result.status != "AC":
                     os.unlink(code_file)
-                    return compile_result
+                    return TestCaseResult(
+                        compile_result.status,
+                        input_data=input_data,
+                        expected_output=expected_output
+                    )
             
             # 运行代码
             run_result = await self._run_code(
@@ -148,7 +182,11 @@ class Judge:
             
         except Exception as e:
             print(f"Test case error: {e}")
-            return TestCaseResult("UNK")
+            return TestCaseResult(
+                "UNK",
+                input_data=input_data,
+                expected_output=expected_output
+            )
     
     async def _compile_code(self, compile_cmd: str, code_file: str, time_limit: float) -> TestCaseResult:
         """编译代码"""
@@ -211,7 +249,12 @@ class Judge:
                 )
             except asyncio.TimeoutError:
                 process.kill()
-                return TestCaseResult("TLE")
+                return TestCaseResult(
+                    "TLE",
+                    time_used=time_limit,
+                    input_data=input_data,
+                    expected_output=expected_output
+                )
             
             end_time = time.time()
             time_used = end_time - start_time
@@ -226,23 +269,53 @@ class Judge:
                 pass
             
             if memory_used > memory_limit:
-                return TestCaseResult("MLE", time_used, memory_used)
+                return TestCaseResult(
+                    "MLE",
+                    time_used=time_used,
+                    memory_used=memory_used,
+                    input_data=input_data,
+                    expected_output=expected_output
+                )
             
             if process.returncode != 0:
-                return TestCaseResult("RE", time_used, memory_used)
+                return TestCaseResult(
+                    "RE",
+                    time_used=time_used,
+                    memory_used=memory_used,
+                    input_data=input_data,
+                    expected_output=expected_output
+                )
             
             # 比较输出
             actual_output = stdout.decode().rstrip()
             expected_output = expected_output.rstrip()
             
             if self._normalize_output(actual_output) == self._normalize_output(expected_output):
-                return TestCaseResult("AC", time_used, memory_used)
+                return TestCaseResult(
+                    "AC",
+                    time_used=time_used,
+                    memory_used=memory_used,
+                    input_data=input_data,
+                    expected_output=expected_output,
+                    actual_output=actual_output
+                )
             else:
-                return TestCaseResult("WA", time_used, memory_used)
+                return TestCaseResult(
+                    "WA",
+                    time_used=time_used,
+                    memory_used=memory_used,
+                    input_data=input_data,
+                    expected_output=expected_output,
+                    actual_output=actual_output
+                )
             
         except Exception as e:
             print(f"Run error: {e}")
-            return TestCaseResult("UNK")
+            return TestCaseResult(
+                "UNK",
+                input_data=input_data,
+                expected_output=expected_output
+            )
     
     def _normalize_output(self, output: str) -> str:
         """标准化输出，忽略多余的空格和换行"""

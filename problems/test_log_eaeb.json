@@ -1,0 +1,31 @@
+{
+  "id": "test_log_eaeb",
+  "title": "日志测试",
+  "description": "计算a+b",
+  "input_description": "两个整数",
+  "output_description": "它们的和",
+  "samples": [
+    {
+      "input": "1 2\n",
+      "output": "3\n"
+    }
+  ],
+  "constraints": "|a|,|b| <= 10^9",
+  "testcases": [
+    {
+      "input": "1 2\n",
+      "output": "3\n"
+    },
+    {
+      "input": "10 20\n",
+      "output": "30\n"
+    }
+  ],
+  "hint": "",
+  "source": "",
+  "tags": [],
+  "time_limit": 1.0,
+  "memory_limit": 128,
+  "author": "",
+  "difficulty": ""
+}

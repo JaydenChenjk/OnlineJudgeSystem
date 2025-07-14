@@ -185,5 +185,27 @@
     "score": 0,
     "counts": 0,
     "submit_time": "2025-07-14T19:40:39.743341"
+  },
+  "6913d965-8c2a-42e9-8a44-2c431ff3cc74": {
+    "submission_id": "6913d965-8c2a-42e9-8a44-2c431ff3cc74",
+    "user_id": "294adf57-912b-4dd6-8f68-740b5d1d3027",
+    "problem_id": "test_log_eaeb",
+    "language": "python",
+    "code": "a, b = map(int, input().split())\nprint(a + b)",
+    "status": "success",
+    "score": 20,
+    "counts": 20,
+    "submit_time": "2025-07-14T20:04:01.677764"
+  },
+  "9308c6bd-f499-4d32-936b-7cb6cd61d041": {
+    "submission_id": "9308c6bd-f499-4d32-936b-7cb6cd61d041",
+    "user_id": "d27c6a06-3ced-4354-8cd8-30cfb9bc5c48",
+    "problem_id": "test_audit_5142",
+    "language": "python",
+    "code": "a, b = map(int, input().split())\nprint(a + b)",
+    "status": "success",
+    "score": 10,
+    "counts": 10,
+    "submit_time": "2025-07-14T20:04:05.889843"
   }
 }
