@@ -33,6 +33,8 @@ class Problem(BaseModel):
     memory_limit: Optional[int] = Field(128, description="内存限制")
     author: Optional[str] = Field("", description="题目作者")
     difficulty: Optional[str] = Field("", description="难度等级")
+    judge_mode: Optional[str] = Field("standard", description="评测模式：standard(标准), strict(严格), spj(特判)")
+    spj_script: Optional[str] = Field("", description="特判脚本内容")
 
 
 class ProblemSummary(BaseModel):

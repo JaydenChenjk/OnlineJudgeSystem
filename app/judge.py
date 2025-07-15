@@ -43,6 +43,10 @@ class Judge:
                 data_store.update_submission(submission_id, status="error")
                 return JudgeResult("error")
             
+            # 获取评测模式
+            judge_mode = getattr(problem, 'judge_mode', 'standard')
+            problem_id = submission["problem_id"]
+            
             # 获取语言配置
             language = data_store.get_language(submission["language"])
             if not language:
@@ -64,7 +68,9 @@ class Judge:
                     test_case.output,
                     problem.time_limit or language.get("time_limit", 3.0),
                     problem.memory_limit or language.get("memory_limit", 128),
-                    i
+                    i,
+                    judge_mode,
+                    problem_id
                 )
                 
                 test_case_results.append({
@@ -128,7 +134,9 @@ class Judge:
         expected_output: str,
         time_limit: float,
         memory_limit: int,
-        test_case_id: int
+        test_case_id: int,
+        judge_mode: str = "standard",
+        problem_id: str = ""
     ) -> TestCaseResult:
         """评测单个测试点"""
         try:
@@ -164,7 +172,9 @@ class Judge:
                 input_data,
                 expected_output,
                 time_limit,
-                memory_limit
+                memory_limit,
+                judge_mode,
+                problem_id
             )
             
             # 清理临时文件
@@ -223,7 +233,9 @@ class Judge:
         input_data: str,
         expected_output: str,
         time_limit: float,
-        memory_limit: int
+        memory_limit: int,
+        judge_mode: str = "standard",
+        problem_id: str = ""
     ) -> TestCaseResult:
         """运行代码"""
         try:
@@ -290,24 +302,77 @@ class Judge:
             actual_output = stdout.decode().rstrip()
             expected_output = expected_output.rstrip()
             
-            if self._normalize_output(actual_output) == self._normalize_output(expected_output):
-                return TestCaseResult(
-                    "AC",
-                    time_used=time_used,
-                    memory_used=memory_used,
-                    input_data=input_data,
-                    expected_output=expected_output,
-                    actual_output=actual_output
-                )
+            # 根据评测模式进行判断
+            if judge_mode == "spj" and problem_id:
+                # 使用SPJ脚本进行评测
+                try:
+                    from .routers.spj import run_spj_script
+                    spj_result = await run_spj_script(problem_id, input_data, expected_output, actual_output)
+                    
+                    if spj_result.get("status") == "AC":
+                        return TestCaseResult(
+                            "AC",
+                            time_used=time_used,
+                            memory_used=memory_used,
+                            input_data=input_data,
+                            expected_output=expected_output,
+                            actual_output=actual_output
+                        )
+                    else:
+                        return TestCaseResult(
+                            "WA",
+                            time_used=time_used,
+                            memory_used=memory_used,
+                            input_data=input_data,
+                            expected_output=expected_output,
+                            actual_output=actual_output
+                        )
+                except Exception as e:
+                    print(f"SPJ评测失败: {e}")
+                    # SPJ失败时回退到标准评测
+                    pass
+            
+            # 标准评测或严格评测
+            if judge_mode == "strict":
+                # 严格模式：完全匹配
+                if actual_output == expected_output:
+                    return TestCaseResult(
+                        "AC",
+                        time_used=time_used,
+                        memory_used=memory_used,
+                        input_data=input_data,
+                        expected_output=expected_output,
+                        actual_output=actual_output
+                    )
+                else:
+                    return TestCaseResult(
+                        "WA",
+                        time_used=time_used,
+                        memory_used=memory_used,
+                        input_data=input_data,
+                        expected_output=expected_output,
+                        actual_output=actual_output
+                    )
             else:
-                return TestCaseResult(
-                    "WA",
-                    time_used=time_used,
-                    memory_used=memory_used,
-                    input_data=input_data,
-                    expected_output=expected_output,
-                    actual_output=actual_output
-                )
+                # 标准模式：忽略多余空格和换行
+                if self._normalize_output(actual_output) == self._normalize_output(expected_output):
+                    return TestCaseResult(
+                        "AC",
+                        time_used=time_used,
+                        memory_used=memory_used,
+                        input_data=input_data,
+                        expected_output=expected_output,
+                        actual_output=actual_output
+                    )
+                else:
+                    return TestCaseResult(
+                        "WA",
+                        time_used=time_used,
+                        memory_used=memory_used,
+                        input_data=input_data,
+                        expected_output=expected_output,
+                        actual_output=actual_output
+                    )
             
         except Exception as e:
             print(f"Run error: {e}")

@@ -1,1 +1,80 @@
-{}
+{
+  "b2b74884-c15b-45ef-99d2-f2695d9b963b": {
+    "submission_id": "b2b74884-c15b-45ef-99d2-f2695d9b963b",
+    "user_id": "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a",
+    "problem_id": "spj_test_688873f1",
+    "language": "python",
+    "code": "n = int(input())\nprint(f\"{n} 0\")",
+    "score": 30,
+    "counts": 30,
+    "test_cases": [
+      {
+        "test_case_id": 0,
+        "status": "AC",
+        "time_used": 0.014322042465209961,
+        "memory_used": 0,
+        "input_data": "5\n",
+        "expected_output": "2 3",
+        "actual_output": "5 0"
+      },
+      {
+        "test_case_id": 1,
+        "status": "AC",
+        "time_used": 0.011680841445922852,
+        "memory_used": 0,
+        "input_data": "10\n",
+        "expected_output": "3 7",
+        "actual_output": "10 0"
+      },
+      {
+        "test_case_id": 2,
+        "status": "AC",
+        "time_used": 0.0110321044921875,
+        "memory_used": 0,
+        "input_data": "0\n",
+        "expected_output": "0 0",
+        "actual_output": "0 0"
+      }
+    ],
+    "submit_time": "2025-07-15T16:15:58.573871"
+  },
+  "d34a66ef-91cf-4a60-892f-d4a403527ce5": {
+    "submission_id": "d34a66ef-91cf-4a60-892f-d4a403527ce5",
+    "user_id": "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a",
+    "problem_id": "spj_test_688873f1",
+    "language": "python",
+    "code": "n = int(input())\nprint(f\"{n+1} 0\")",
+    "score": 0,
+    "counts": 30,
+    "test_cases": [
+      {
+        "test_case_id": 0,
+        "status": "WA",
+        "time_used": 0.026597023010253906,
+        "memory_used": 0,
+        "input_data": "5\n",
+        "expected_output": "2 3",
+        "actual_output": "6 0"
+      },
+      {
+        "test_case_id": 1,
+        "status": "WA",
+        "time_used": 0.01263117790222168,
+        "memory_used": 0,
+        "input_data": "10\n",
+        "expected_output": "3 7",
+        "actual_output": "11 0"
+      },
+      {
+        "test_case_id": 2,
+        "status": "WA",
+        "time_used": 0.01099395751953125,
+        "memory_used": 0,
+        "input_data": "0\n",
+        "expected_output": "0 0",
+        "actual_output": "1 0"
+      }
+    ],
+    "submit_time": "2025-07-15T16:16:01.590684"
+  }
+}

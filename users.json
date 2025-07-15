@@ -34,5 +34,14 @@
     "join_time": "2025-07-14",
     "submit_count": 0,
     "resolve_count": 0
+  },
+  "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a": {
+    "user_id": "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a",
+    "username": "spj_user_18b902b0",
+    "password_hash": "$2b$12$9f7izTnhaE0QZzlILhmnLeTukQ7nCZy5mNo4LPOaub4ia5FSh1GnK",
+    "role": "user",
+    "join_time": "2025-07-15",
+    "submit_count": 2,
+    "resolve_count": 0
   }
 }

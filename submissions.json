@@ -1,1 +1,24 @@
-{}
+{
+  "b2b74884-c15b-45ef-99d2-f2695d9b963b": {
+    "submission_id": "b2b74884-c15b-45ef-99d2-f2695d9b963b",
+    "user_id": "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a",
+    "problem_id": "spj_test_688873f1",
+    "language": "python",
+    "code": "n = int(input())\nprint(f\"{n} 0\")",
+    "status": "success",
+    "score": 30,
+    "counts": 30,
+    "submit_time": "2025-07-15T16:15:58.573871"
+  },
+  "d34a66ef-91cf-4a60-892f-d4a403527ce5": {
+    "submission_id": "d34a66ef-91cf-4a60-892f-d4a403527ce5",
+    "user_id": "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a",
+    "problem_id": "spj_test_688873f1",
+    "language": "python",
+    "code": "n = int(input())\nprint(f\"{n+1} 0\")",
+    "status": "success",
+    "score": 0,
+    "counts": 30,
+    "submit_time": "2025-07-15T16:16:01.590684"
+  }
+}

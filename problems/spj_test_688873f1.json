@@ -1,0 +1,37 @@
+{
+  "id": "spj_test_688873f1",
+  "title": "SPJ测试题目",
+  "description": "输出任意一组满足条件的解",
+  "input_description": "输入一个整数n",
+  "output_description": "输出两个整数a和b，使得a+b=n",
+  "samples": [
+    {
+      "input": "5\n",
+      "output": "2 3\n"
+    }
+  ],
+  "constraints": "1 <= n <= 100",
+  "testcases": [
+    {
+      "input": "5\n",
+      "output": "2 3\n"
+    },
+    {
+      "input": "10\n",
+      "output": "3 7\n"
+    },
+    {
+      "input": "0\n",
+      "output": "0 0\n"
+    }
+  ],
+  "hint": "",
+  "source": "",
+  "tags": [],
+  "time_limit": 1.0,
+  "memory_limit": 128,
+  "author": "",
+  "difficulty": "",
+  "judge_mode": "spj",
+  "spj_script": ""
+}
