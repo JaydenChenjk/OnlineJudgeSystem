@@ -8,7 +8,15 @@ from ..auth import require_auth, require_admin, get_current_user
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
 PROBLEMS_DIR = "problems"  # 题目配置文件目录
+SPJ_DIR = "spj_scripts"  # SPJ脚本存储目录
 os.makedirs(PROBLEMS_DIR, exist_ok=True)  # 确保目录存在
+os.makedirs(SPJ_DIR, exist_ok=True)  # 确保SPJ目录存在
+
+def has_spj_script(problem_id: str) -> bool:
+    """检查题目是否有SPJ脚本"""
+    py_path = os.path.join(SPJ_DIR, f"{problem_id}.py")
+    cpp_path = os.path.join(SPJ_DIR, f"{problem_id}.cpp")
+    return os.path.exists(py_path) or os.path.exists(cpp_path)
 
 
 def get_problem_file_path(problem_id: str) -> str:
@@ -94,7 +102,15 @@ async def get_problem(problem_id: str, request: Request):
     
     try:
         problem = load_problem(problem_id)  # 返回完整题目信息
-        return {"code": 200, "msg": "success", "data": problem}
+        
+        # 检查是否有SPJ脚本
+        has_spj = has_spj_script(problem_id)
+        
+        # 构建响应数据，包含SPJ信息
+        problem_data = problem.model_dump()
+        problem_data["has_spj"] = has_spj
+        
+        return {"code": 200, "msg": "success", "data": problem_data}
     except HTTPException:
         raise
     except Exception as e:
@@ -118,7 +134,12 @@ async def create_problem(problem: Problem, request: Request):
             )  # 检查题目是否已存在
         
         save_problem(problem)  # 保存新题目
-        return {"code": 200, "msg": "add success", "data": {"id": problem.id}}  # 标准响应格式
+        
+        # 返回完整的题目数据
+        problem_data = problem.model_dump()
+        problem_data["has_spj"] = has_spj_script(problem.id)
+        
+        return {"code": 200, "msg": "add success", "data": problem_data}  # 返回完整题目数据
     except HTTPException:
         raise
     except Exception as e:

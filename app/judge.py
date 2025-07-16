@@ -7,6 +7,7 @@ import psutil
 import time
 from typing import Dict, List, Tuple, Optional
 from .models import data_store
+from .docker_judge import docker_judge
 
 
 class JudgeResult:
@@ -137,65 +138,27 @@ class Judge:
         test_case_id: int,
         judge_mode: str = "standard",
         problem_id: str = ""
-    ) -> TestCaseResult:
-        """评测单个测试点"""
+    ):
+        """评测单个测试点（使用Docker安全评测）"""
         try:
-            # 创建临时文件
-            with tempfile.NamedTemporaryFile(
-                mode='w',
-                suffix=language_config["file_ext"],
-                delete=False,
-                dir=self.temp_dir
-            ) as f:
-                f.write(code)
-                code_file = f.name
-            
-            # 编译（如果需要）
-            if language_config.get("compile_cmd"):
-                compile_result = await self._compile_code(
-                    language_config["compile_cmd"],
-                    code_file,
-                    time_limit
-                )
-                if compile_result.status != "AC":
-                    os.unlink(code_file)
-                    return TestCaseResult(
-                        compile_result.status,
-                        input_data=input_data,
-                        expected_output=expected_output
-                    )
-            
-            # 运行代码
-            run_result = await self._run_code(
-                language_config["run_cmd"],
-                code_file,
-                input_data,
-                expected_output,
-                time_limit,
-                memory_limit,
-                judge_mode,
-                problem_id
+            # 使用Docker评测器
+            return await docker_judge.judge_test_case(
+                code=code,
+                language=language_name,
+                input_data=input_data,
+                expected_output=expected_output,
+                time_limit=time_limit,
+                memory_limit=memory_limit,
+                judge_mode=judge_mode,
+                problem_id=problem_id
             )
-            
-            # 清理临时文件
-            try:
-                os.unlink(code_file)
-                # 清理编译产物
-                if language_name == "cpp":
-                    exe_file = code_file.replace(".cpp", "")
-                    if os.path.exists(exe_file):
-                        os.unlink(exe_file)
-            except:
-                pass
-            
-            return run_result
-            
         except Exception as e:
             print(f"Test case error: {e}")
             return TestCaseResult(
-                "UNK",
+                status="UNK",
                 input_data=input_data,
-                expected_output=expected_output
+                expected_output=expected_output,
+                actual_output=""
             )
     
     async def _compile_code(self, compile_cmd: str, code_file: str, time_limit: float) -> TestCaseResult:
@@ -215,16 +178,16 @@ class Judge:
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=time_limit)
             except asyncio.TimeoutError:
                 process.kill()
-                return TestCaseResult("TLE")
+                return TestCaseResult(status="TLE", actual_output="")
             
             if process.returncode != 0:
-                return TestCaseResult("CE")
+                return TestCaseResult(status="CE", actual_output="")
             
-            return TestCaseResult("AC")
+            return TestCaseResult(status="AC", actual_output="")
             
         except Exception as e:
             print(f"Compile error: {e}")
-            return TestCaseResult("CE")
+            return TestCaseResult(status="CE", actual_output="")
     
     async def _run_code(
         self,
@@ -262,10 +225,11 @@ class Judge:
             except asyncio.TimeoutError:
                 process.kill()
                 return TestCaseResult(
-                    "TLE",
+                    status="TLE",
                     time_used=time_limit,
                     input_data=input_data,
-                    expected_output=expected_output
+                    expected_output=expected_output,
+                    actual_output=""
                 )
             
             end_time = time.time()
@@ -282,20 +246,22 @@ class Judge:
             
             if memory_used > memory_limit:
                 return TestCaseResult(
-                    "MLE",
+                    status="MLE",
                     time_used=time_used,
                     memory_used=memory_used,
                     input_data=input_data,
-                    expected_output=expected_output
+                    expected_output=expected_output,
+                    actual_output=""
                 )
             
             if process.returncode != 0:
                 return TestCaseResult(
-                    "RE",
+                    status="RE",
                     time_used=time_used,
                     memory_used=memory_used,
                     input_data=input_data,
-                    expected_output=expected_output
+                    expected_output=expected_output,
+                    actual_output=""
                 )
             
             # 比较输出
@@ -311,7 +277,7 @@ class Judge:
                     
                     if spj_result.get("status") == "AC":
                         return TestCaseResult(
-                            "AC",
+                            status="AC",
                             time_used=time_used,
                             memory_used=memory_used,
                             input_data=input_data,
@@ -320,7 +286,7 @@ class Judge:
                         )
                     else:
                         return TestCaseResult(
-                            "WA",
+                            status="WA",
                             time_used=time_used,
                             memory_used=memory_used,
                             input_data=input_data,
@@ -337,7 +303,7 @@ class Judge:
                 # 严格模式：完全匹配
                 if actual_output == expected_output:
                     return TestCaseResult(
-                        "AC",
+                        status="AC",
                         time_used=time_used,
                         memory_used=memory_used,
                         input_data=input_data,
@@ -346,7 +312,7 @@ class Judge:
                     )
                 else:
                     return TestCaseResult(
-                        "WA",
+                        status="WA",
                         time_used=time_used,
                         memory_used=memory_used,
                         input_data=input_data,
@@ -357,7 +323,7 @@ class Judge:
                 # 标准模式：忽略多余空格和换行
                 if self._normalize_output(actual_output) == self._normalize_output(expected_output):
                     return TestCaseResult(
-                        "AC",
+                        status="AC",
                         time_used=time_used,
                         memory_used=memory_used,
                         input_data=input_data,
@@ -366,7 +332,7 @@ class Judge:
                     )
                 else:
                     return TestCaseResult(
-                        "WA",
+                        status="WA",
                         time_used=time_used,
                         memory_used=memory_used,
                         input_data=input_data,
@@ -377,9 +343,10 @@ class Judge:
         except Exception as e:
             print(f"Run error: {e}")
             return TestCaseResult(
-                "UNK",
+                status="UNK",
                 input_data=input_data,
-                expected_output=expected_output
+                expected_output=expected_output,
+                actual_output=""
             )
     
     def _normalize_output(self, output: str) -> str:

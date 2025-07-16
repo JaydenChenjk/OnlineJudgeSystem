@@ -1,46 +1,73 @@
 {
-  "81ecc25a-9eaa-4253-a8c7-90670ad47be4": {
-    "user_id": "81ecc25a-9eaa-4253-a8c7-90670ad47be4",
+  "9e555e9e-e570-4538-b387-054bd7c5a491": {
+    "user_id": "9e555e9e-e570-4538-b387-054bd7c5a491",
     "username": "admin",
-    "password_hash": "$2b$12$onr0KmB7Gp1r1HAH0IjzvO2.BnPDFPBkwThxD3f1OuVCbPr6P2Ase",
+    "password_hash": "$2b$12$r7repBNlYNh.Eqlx.rzRCu8bHky//gXgMOr4W0b71PVq2ElIySjti",
     "role": "admin",
-    "join_time": "2025-07-14",
-    "submit_count": 0,
-    "resolve_count": 0
-  },
-  "0547c2a2-dcf9-427f-b942-d332b8bdc4cc": {
-    "user_id": "0547c2a2-dcf9-427f-b942-d332b8bdc4cc",
-    "username": "test_user_f54b1b0c",
-    "password_hash": "$2b$12$LxUvTqL.phwUDVD5uTTIJe4RUEXJVB8egRz76dv5ZXWcFd6YQXCRq",
-    "role": "user",
-    "join_time": "2025-07-14",
-    "submit_count": 0,
-    "resolve_count": 0
-  },
-  "f1b239fa-3927-41a7-874a-de8d8261119e": {
-    "user_id": "f1b239fa-3927-41a7-874a-de8d8261119e",
-    "username": "test_user_0308f4c7",
-    "password_hash": "$2b$12$YfB9iwc.3t3cp/PJ/XtcwuXtIHksZIcNld1jHoPdTDSAyDIW1u77y",
-    "role": "user",
-    "join_time": "2025-07-14",
-    "submit_count": 0,
-    "resolve_count": 0
-  },
-  "5905fe1c-e21b-4e5f-8bd6-1877fe5a2d43": {
-    "user_id": "5905fe1c-e21b-4e5f-8bd6-1877fe5a2d43",
-    "username": "test_user_24d8b43f",
-    "password_hash": "$2b$12$55uOdBwPW2nKSA.dGrHD1es/0KTlKsAxMsjLlKeNE05J.ClcHG676",
-    "role": "user",
-    "join_time": "2025-07-14",
-    "submit_count": 0,
-    "resolve_count": 0
-  },
-  "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a": {
-    "user_id": "b4f45b4f-4f08-4f0a-9e7a-b4aec80e032a",
-    "username": "spj_user_18b902b0",
-    "password_hash": "$2b$12$9f7izTnhaE0QZzlILhmnLeTukQ7nCZy5mNo4LPOaub4ia5FSh1GnK",
-    "role": "user",
     "join_time": "2025-07-15",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "3e4f556f-3ba8-456b-9458-682a0bbb87ae": {
+    "user_id": "3e4f556f-3ba8-456b-9458-682a0bbb87ae",
+    "username": "spj_cpp_user_ca818692",
+    "password_hash": "$2b$12$vXxcW7wdo70PuXAJiQ6qNug2p0Mx4y53G88l6nParuZd/fI7EFG9.",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "1be2e534-9dd2-4650-a14f-02ecc249e672": {
+    "user_id": "1be2e534-9dd2-4650-a14f-02ecc249e672",
+    "username": "test_user_5a7d2d41",
+    "password_hash": "$2b$12$Ym.Nlf6v0mimz4bhxEXWcefWwOnirnRasl6qooH8fTyHvjMkKr1LG",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "1df2b6a6-8daa-446b-b026-5a2d8ee4c36f": {
+    "user_id": "1df2b6a6-8daa-446b-b026-5a2d8ee4c36f",
+    "username": "test_user_c80a0fe0",
+    "password_hash": "$2b$12$c.FKUABsM6TvyrOUaISmM.krkf7v47pjOmtHhzLl4DXMGfRnLvOh2",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 2,
+    "resolve_count": 0
+  },
+  "57f58994-27dc-40fd-b8d2-d902df15c846": {
+    "user_id": "57f58994-27dc-40fd-b8d2-d902df15c846",
+    "username": "test_user_91b37943",
+    "password_hash": "$2b$12$nxxm7y2uKcm4RuP.AWHMQezhlCCM/XkPfVWC3dlK/K2x7cBjuaLI6",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "07ac5507-0fbe-41b9-8623-63476e8fe3ea": {
+    "user_id": "07ac5507-0fbe-41b9-8623-63476e8fe3ea",
+    "username": "test_user_4ebe89ad",
+    "password_hash": "$2b$12$dJc6m3.s4SJ8afkjY6Q6nOqyXPsiE4jOlflhDXAd9NrqZYKBGsA46",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 2,
+    "resolve_count": 0
+  },
+  "74ce55bd-d0b6-420d-ac25-941569a694b8": {
+    "user_id": "74ce55bd-d0b6-420d-ac25-941569a694b8",
+    "username": "test_user_fc661079",
+    "password_hash": "$2b$12$3TFUMOBLxNyRCYWefZqVD.WRfhcxztdOhk1YsB2d3ybmUIy8yxsZ6",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "0386f0af-54a0-4938-b7fb-b07b911f97da": {
+    "user_id": "0386f0af-54a0-4938-b7fb-b07b911f97da",
+    "username": "test_user_6c7f322a",
+    "password_hash": "$2b$12$DOc0vQXeaB8/oGNMpD5o9uEJ88bHFgBqEke28BQxSp6PdWkzpHi1O",
+    "role": "user",
+    "join_time": "2025-07-16",
     "submit_count": 2,
     "resolve_count": 0
   }
