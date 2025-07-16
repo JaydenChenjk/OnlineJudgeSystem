@@ -1,7 +1,7 @@
 {
-  "id": "spj_test_9ed76799_standard",
-  "title": "SPJ测试题目 - standard",
-  "description": "测试standard模式的题目",
+  "id": "spj_test_5c60d6f6",
+  "title": "SPJ测试题目 - spj",
+  "description": "测试spj模式的题目",
   "input_description": "输入两个整数",
   "output_description": "输出它们的和",
   "samples": [
@@ -27,6 +27,6 @@
   "memory_limit": 128,
   "author": "admin",
   "difficulty": "简单",
-  "judge_mode": "standard",
+  "judge_mode": "spj",
   "spj_script": ""
 }

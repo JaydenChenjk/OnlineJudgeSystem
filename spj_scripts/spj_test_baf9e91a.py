@@ -8,7 +8,7 @@ def main():
     expected_output = data["expected_output"]
     actual_output = data["actual_output"]
     
-    # 检查输出是否包含期望的内容
+    # 简单的SPJ逻辑：检查输出是否包含期望的数字
     if expected_output.strip() in actual_output.strip():
         result = {"status": "ACCEPTED", "score": 100, "message": "输出正确"}
     else:

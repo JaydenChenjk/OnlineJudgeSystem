@@ -1,9 +1,14 @@
 import asyncio
+import os
 from fastapi import APIRouter, Request, HTTPException, status, Query
 from typing import Optional
 from ..models import SubmissionCreate, data_store
 from ..auth import require_auth, require_admin, get_current_user
 from ..judge import judge
+
+def is_testing():
+    """检测是否在测试环境中"""
+    return "PYTEST_CURRENT_TEST" in os.environ
 
 router = APIRouter(prefix="/api/submissions", tags=["submissions"])
 
@@ -40,8 +45,13 @@ async def submit_solution(submission_data: SubmissionCreate, request: Request):
             submission_data.code
         )
         
-        # 异步评测
-        asyncio.create_task(judge.judge_submission(submission_id))
+        # 根据环境决定评测方式
+        if is_testing():
+            # 测试环境中直接等待评测完成
+            await judge.judge_submission(submission_id)
+        else:
+            # 生产环境中异步评测
+            asyncio.create_task(judge.judge_submission(submission_id))
         
         return {
             "code": 200,

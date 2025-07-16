@@ -1,74 +1,74 @@
 {
-  "9e555e9e-e570-4538-b387-054bd7c5a491": {
-    "user_id": "9e555e9e-e570-4538-b387-054bd7c5a491",
+  "35e86937-9373-4c52-a82e-838494e124b5": {
+    "user_id": "35e86937-9373-4c52-a82e-838494e124b5",
     "username": "admin",
-    "password_hash": "$2b$12$r7repBNlYNh.Eqlx.rzRCu8bHky//gXgMOr4W0b71PVq2ElIySjti",
+    "password_hash": "$2b$12$AaL0F.xyC7j6TC86Nt.Fnek8foPdhF4.DmkNOrlCaXRuj7JPrfQea",
     "role": "admin",
-    "join_time": "2025-07-15",
-    "submit_count": 0,
-    "resolve_count": 0
-  },
-  "3e4f556f-3ba8-456b-9458-682a0bbb87ae": {
-    "user_id": "3e4f556f-3ba8-456b-9458-682a0bbb87ae",
-    "username": "spj_cpp_user_ca818692",
-    "password_hash": "$2b$12$vXxcW7wdo70PuXAJiQ6qNug2p0Mx4y53G88l6nParuZd/fI7EFG9.",
-    "role": "user",
     "join_time": "2025-07-16",
     "submit_count": 0,
     "resolve_count": 0
   },
-  "1be2e534-9dd2-4650-a14f-02ecc249e672": {
-    "user_id": "1be2e534-9dd2-4650-a14f-02ecc249e672",
-    "username": "test_user_5a7d2d41",
-    "password_hash": "$2b$12$Ym.Nlf6v0mimz4bhxEXWcefWwOnirnRasl6qooH8fTyHvjMkKr1LG",
+  "9711702c-a3aa-418d-8167-c63b606f6d61": {
+    "user_id": "9711702c-a3aa-418d-8167-c63b606f6d61",
+    "username": "test_user_4943590d",
+    "password_hash": "$2b$12$/0nbfIjD2QiTD09n4cMmy.u5AqcY.Hb6pmsTIfsMoGbmSZBqjdP/G",
     "role": "user",
     "join_time": "2025-07-16",
     "submit_count": 0,
     "resolve_count": 0
   },
-  "1df2b6a6-8daa-446b-b026-5a2d8ee4c36f": {
-    "user_id": "1df2b6a6-8daa-446b-b026-5a2d8ee4c36f",
-    "username": "test_user_c80a0fe0",
-    "password_hash": "$2b$12$c.FKUABsM6TvyrOUaISmM.krkf7v47pjOmtHhzLl4DXMGfRnLvOh2",
-    "role": "user",
-    "join_time": "2025-07-16",
-    "submit_count": 2,
-    "resolve_count": 0
-  },
-  "57f58994-27dc-40fd-b8d2-d902df15c846": {
-    "user_id": "57f58994-27dc-40fd-b8d2-d902df15c846",
-    "username": "test_user_91b37943",
-    "password_hash": "$2b$12$nxxm7y2uKcm4RuP.AWHMQezhlCCM/XkPfVWC3dlK/K2x7cBjuaLI6",
+  "bef0efd6-e37a-4a82-b32c-d02dfed6e810": {
+    "user_id": "bef0efd6-e37a-4a82-b32c-d02dfed6e810",
+    "username": "test_user_63862d61",
+    "password_hash": "$2b$12$jWKWU9m5hoe.UJtRttFg7eIOvczgaPGYdcaUZx98rWzRLcXSr/Gre",
     "role": "user",
     "join_time": "2025-07-16",
     "submit_count": 0,
     "resolve_count": 0
   },
-  "07ac5507-0fbe-41b9-8623-63476e8fe3ea": {
-    "user_id": "07ac5507-0fbe-41b9-8623-63476e8fe3ea",
-    "username": "test_user_4ebe89ad",
-    "password_hash": "$2b$12$dJc6m3.s4SJ8afkjY6Q6nOqyXPsiE4jOlflhDXAd9NrqZYKBGsA46",
-    "role": "user",
-    "join_time": "2025-07-16",
-    "submit_count": 2,
-    "resolve_count": 0
-  },
-  "74ce55bd-d0b6-420d-ac25-941569a694b8": {
-    "user_id": "74ce55bd-d0b6-420d-ac25-941569a694b8",
-    "username": "test_user_fc661079",
-    "password_hash": "$2b$12$3TFUMOBLxNyRCYWefZqVD.WRfhcxztdOhk1YsB2d3ybmUIy8yxsZ6",
+  "3680bf0a-3bd9-4c13-b385-d7485205a5f9": {
+    "user_id": "3680bf0a-3bd9-4c13-b385-d7485205a5f9",
+    "username": "test_user_fa1d2aaf",
+    "password_hash": "$2b$12$ViuU50/IPASJKO35dVWyLe3d/qibKlbRKMPoMsZkL6tHXkIG8ZvRG",
     "role": "user",
     "join_time": "2025-07-16",
     "submit_count": 0,
     "resolve_count": 0
   },
-  "0386f0af-54a0-4938-b7fb-b07b911f97da": {
-    "user_id": "0386f0af-54a0-4938-b7fb-b07b911f97da",
-    "username": "test_user_6c7f322a",
-    "password_hash": "$2b$12$DOc0vQXeaB8/oGNMpD5o9uEJ88bHFgBqEke28BQxSp6PdWkzpHi1O",
+  "929413fa-f80e-4f1e-8982-33bca6b96e29": {
+    "user_id": "929413fa-f80e-4f1e-8982-33bca6b96e29",
+    "username": "test_user_42d4849d",
+    "password_hash": "$2b$12$dkiLh5H73U3ovhLSyfsoh.F/CFtsbvApbWkUi3Y9kdheqquojOVUG",
     "role": "user",
     "join_time": "2025-07-16",
-    "submit_count": 2,
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "fee92df6-e1df-40dc-869e-06eea1ed4069": {
+    "user_id": "fee92df6-e1df-40dc-869e-06eea1ed4069",
+    "username": "test_user_037dcdc8",
+    "password_hash": "$2b$12$5RgiWfruVk4czSMFhL/SN.EsiLrViAHnZmiafXre9WbHoD6SJ5YpW",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 1,
+    "resolve_count": 0
+  },
+  "041e2bb8-a9fd-452a-a9c5-fb994fe7819f": {
+    "user_id": "041e2bb8-a9fd-452a-a9c5-fb994fe7819f",
+    "username": "test_user_3e18dc9c",
+    "password_hash": "$2b$12$SBM3hV86ZJ3dqb3iPctSSu7hn46A/TaZVw1nMueTSVfP79vOpMfi.",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 0,
+    "resolve_count": 0
+  },
+  "7afe9a65-fd15-480e-96fd-cabfa39af177": {
+    "user_id": "7afe9a65-fd15-480e-96fd-cabfa39af177",
+    "username": "test_user_f0db6bb4",
+    "password_hash": "$2b$12$9p0I5T0sW3xQk1QfjZYq8.vkjmi/Oore4a6cWkRpjKXAa8BMgDDWO",
+    "role": "user",
+    "join_time": "2025-07-16",
+    "submit_count": 1,
     "resolve_count": 0
   }
 }
