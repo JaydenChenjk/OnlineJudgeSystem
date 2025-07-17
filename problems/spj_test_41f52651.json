@@ -1,0 +1,29 @@
+{
+  "id": "spj_test_41f52651",
+  "title": "SPJ测试题目 - spj",
+  "description": "计算a+b",
+  "input_description": "两个整数",
+  "output_description": "它们的和",
+  "samples": [
+    {
+      "input": "1 2",
+      "output": "3"
+    }
+  ],
+  "constraints": "|a|,|b| <= 10^9",
+  "testcases": [
+    {
+      "input": "1 2",
+      "output": "3"
+    }
+  ],
+  "hint": "",
+  "source": "",
+  "tags": [],
+  "time_limit": 1.0,
+  "memory_limit": 128,
+  "author": "",
+  "difficulty": "",
+  "judge_mode": "spj",
+  "spj_script": ""
+}

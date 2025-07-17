@@ -8,17 +8,14 @@ import time
 from app.docker_judge import DockerJudge
 
 
-class TestDockerSecurity:
-    """Docker安全机制测试"""
+class TestDockerSecurity:   # 测试 Docker        
     
     @pytest.fixture
-    def docker_judge(self):
-        """创建Docker评测器实例"""
+    def docker_judge(self):     # 创建 Docker评测器对象
         return DockerJudge()
     
     @pytest.fixture
-    def temp_code_files(self):
-        """创建临时代码文件"""
+    def temp_code_files(self):   # 创建临时代码文件
         with tempfile.TemporaryDirectory() as temp_dir:
             # Python代码文件
             python_code = """print("Hello, World!")"""
@@ -42,12 +39,9 @@ int main() {
                 "temp_dir": temp_dir
             }
     
-    def test_docker_availability(self, docker_judge):
-        """测试Docker可用性检查"""
-        # 检查Docker是否可用
-        assert hasattr(docker_judge, 'docker_available')
+    def test_docker_availability(self, docker_judge):   # Docker可用性检查
+        assert hasattr(docker_judge, 'docker_available')    # 确保docker_judge对象有"docker_available"属性
         
-        # 如果Docker可用，应该能获取版本信息
         if docker_judge.docker_available:
             result = subprocess.run(
                 ["docker", "--version"],
@@ -55,12 +49,10 @@ int main() {
                 text=True,
                 timeout=5
             )
-            assert result.returncode == 0
+            assert result.returncode == 0    
             assert "Docker version" in result.stdout
     
-    def test_command_validation(self, docker_judge):
-        """测试命令过滤与安全校验"""
-        # 测试白名单命令
+    def test_command_validation(self, docker_judge):   # 测试命令过滤与安全校验
         allowed_commands = [
             "python main.py",
             "python3 test.py",

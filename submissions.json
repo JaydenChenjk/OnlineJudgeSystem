@@ -1,1 +1,24 @@
-{}
+{
+  "332e9517-720a-4bd2-b957-3cbf231416ee": {
+    "submission_id": "332e9517-720a-4bd2-b957-3cbf231416ee",
+    "user_id": "a5ba6a64-6612-425b-8ef9-0c830b88e049",
+    "problem_id": "spj_test_23ae50ac",
+    "language": "python",
+    "code": "a, b = map(int, input().split())\nprint(a + b)",
+    "status": "success",
+    "score": 10,
+    "counts": 10,
+    "submit_time": "2025-07-17T20:49:29.919594"
+  },
+  "d987a44c-ad3a-4fff-814a-828d197202e2": {
+    "submission_id": "d987a44c-ad3a-4fff-814a-828d197202e2",
+    "user_id": "a5ba6a64-6612-425b-8ef9-0c830b88e049",
+    "problem_id": "spj_test_23ae50ac",
+    "language": "python",
+    "code": "a, b = map(int, input().split())\nprint(a - b)",
+    "status": "success",
+    "score": 0,
+    "counts": 10,
+    "submit_time": "2025-07-17T20:49:32.862429"
+  }
+}

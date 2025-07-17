@@ -9,10 +9,9 @@ import psutil
 from typing import Optional, Dict, Any
 
 
-class DockerJudge:
-    """Docker安全评测器"""
+class DockerJudge:   # Docker安全评测器
     
-    def __init__(self):
+    def __init__(self):   
         self.base_images = {
             "python": "python:3.9-slim",
             "cpp": "gcc:11"
@@ -20,9 +19,7 @@ class DockerJudge:
         self.container_prefix = "oj_judge_"
         self.ensure_images()
     
-    def ensure_images(self):
-        """确保Docker镜像存在"""
-        # 检查Docker是否可用
+    def ensure_images(self):   # 确保Docker镜像存在
         try:
             result = subprocess.run(
                 ["docker", "--version"],
@@ -56,27 +53,26 @@ class DockerJudge:
                         timeout=60
                     )
             except Exception as e:
-                print(f"确保镜像失败 {image}: {e}")
+                print(f"镜像失败 {image}: {e}")
     
-    def validate_command(self, cmd: str) -> bool:
-        """验证命令安全性"""
-        # 命令白名单
-        allowed_commands = {
+    def validate_command(self, cmd: str) -> bool:   # 验证命令安全性
+        allowed_commands = {    # 白名单
             "python", "python3", "gcc", "g++", "make", "cc", "c++"
         }
-        # 危险命令黑名单（禁止docker命令）
-        dangerous_commands = {
-            "rm", "rmdir", "del", "format", "mkfs", "dd", "shred",
-            "sudo", "su", "chmod", "chown", "mount", "umount",
+        
+        dangerous_commands = {   # 危险命令黑名单
+            "rm", "rmdir", "del", "format", "mkfs", "dd", "shred",  # 删除文件
+            "sudo", "su", "chmod", "chown", "mount", "umount",  # sudo权限操作
             "iptables", "firewall", "service", "systemctl",
-            "ssh", "scp", "wget", "curl", "nc", "telnet",
-            "kubectl", "helm", "docker"  # 禁止一切docker命令
+            "ssh", "scp", "wget", "curl", "nc", "telnet",   # 联网或远程控制
+            "kubectl", "helm", "docker"  # 容器控制、集群控制
         }
-        # 危险参数
-        dangerous_flags = {
+
+        dangerous_flags = {   # 危险参数
             "-rf", "--recursive", "--force", "--no-preserve-root",
             "--preserve-root=0", "-exec", "-ok", "-delete", "--privileged"
         }
+
         cmd_parts = cmd.lower().split()
         if not cmd_parts:
             return False
@@ -90,8 +86,7 @@ class DockerJudge:
                 return False
         return True
     
-    def create_dockerfile(self, language: str, code_file: str, work_dir: str) -> str:
-        """创建Dockerfile"""
+    def create_dockerfile(self, language: str, code_file: str, work_dir: str) -> str:   # 创建Dockerfile
         if language == "python":
             dockerfile_content = f"""
 FROM {self.base_images[language]}
@@ -124,54 +119,54 @@ CMD ["./main"]
         time_limit: float,
         memory_limit: int,
         container_name: str
-    ) -> Dict[str, Any]:
-        """在Docker容器中运行代码"""
+    ) -> Dict[str, Any]:   # 在Docker容器中运行代码
+
         if not getattr(self, 'docker_available', True):
             return await self._run_simulation(language, code_file, input_data, time_limit, memory_limit)
         image_name = f"{container_name}_image"
         dockerfile_path = None
         temp_dir = os.path.dirname(code_file)
         try:
-            work_dir = "/app"  # 改为/app，避免与--tmpfs /tmp冲突
+            work_dir = "/app"  
             dockerfile_path = self.create_dockerfile(language, code_file, work_dir)
             build_cmd = [
                 "docker", "build", "-t", image_name,
                 temp_dir
             ]
-            # 只允许系统内部调用docker命令，validate_command只校验用户代码命令
-            build_process = await asyncio.create_subprocess_exec(
+
+            build_process = await asyncio.create_subprocess_exec(   # 异步构建Docker镜像
                 *build_cmd,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
             try:
                 stdout, stderr = await asyncio.wait_for(
-                    build_process.communicate(),
+                    build_process.communicate(),    
                     timeout=30.0
                 )
             except asyncio.TimeoutError:
                 build_process.kill()
                 return {"status": "CE", "error": "构建超时"}
-            if build_process.returncode != 0:
+            if build_process.returncode != 0:   
                 return {"status": "CE", "error": stderr.decode()}
-            # 运行Docker容器，使用/app作为工作目录
-            if language == "python":
+            
+            if language == "python":   # 运行Docker容器，使用/app作为工作目录
                 run_cmd = [
                     "docker", "run",
                     "--name", container_name,
                     "--rm",
-                    "--network", "none",
-                    "--memory", f"{memory_limit}m",
-                    "--cpus", str(time_limit),
-                    "--pids-limit", "50",
-                    "--ulimit", "nofile=64:64",
-                    "--security-opt", "no-new-privileges",
-                    "--cap-drop", "ALL",
-                    "--tmpfs", "/tmp:rw,noexec,nosuid,size=100m",
+                    "--network", "none",    # 禁止网络访问
+                    "--memory", f"{memory_limit}m",   # 限制内存使用
+                    "--cpus", str(time_limit),   # 限制CPU使用时间
+                    "--pids-limit", "50",   # 限制进程数
+                    "--ulimit", "nofile=64:64",     # 限制打开文件数
+                    "--security-opt", "no-new-privileges",  # 禁止容器在运行时获得提权
+                    "--cap-drop", "ALL",    # 关闭所有系统能力
+                    "--tmpfs", "/tmp:rw,noexec,nosuid,size=100m",   # 将临时目录挂载为RAM，防止I/O恶意行为
                     "--tmpfs", "/var/tmp:rw,noexec,nosuid,size=32m",
-                    "-v", f"{temp_dir}:/app/input:ro",
+                    "-v", f"{temp_dir}:/app/input:ro",   # 挂载输入文件，防止用户修改输入文件
                     image_name,
-                    "sh", "-c", f"cat > /app/input.txt << 'EOF'\n{input_data}\nEOF\npython /app/{os.path.basename(code_file)} < /app/input.txt"
+                    "sh", "-c", f"cat > /app/input.txt << 'EOF'\n{input_data}\nEOF\npython /app/{os.path.basename(code_file)} < /app/input.txt"  # 读取输入并运行
                 ]
             else:  # cpp
                 run_cmd = [
@@ -192,9 +187,9 @@ CMD ["./main"]
                     "sh", "-c", f"cat > /app/input.txt << 'EOF'\n{input_data}\nEOF\n/app/main < /app/input.txt"
                 ]
             start_time = time.time()
-            run_process = await asyncio.create_subprocess_exec(
+            run_process = await asyncio.create_subprocess_exec(     # 异步创建 Docker 容器进程
                 *run_cmd,
-                stdout=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,     # 捕获程序输出
                 stderr=asyncio.subprocess.PIPE
             )
             try:
@@ -202,18 +197,19 @@ CMD ["./main"]
                     run_process.communicate(),
                     timeout=time_limit + 1.0
                 )
-            except asyncio.TimeoutError:
+            except asyncio.TimeoutError:    # 安全响应：TLE时自动终止进程并杀掉Docker容器
                 run_process.kill()
                 await asyncio.create_subprocess_exec("docker", "kill", container_name)
                 return {"status": "TLE", "time_used": time_limit}
             end_time = time.time()
             time_used = end_time - start_time
-            if run_process.returncode != 0:
+            if run_process.returncode != 0: 
                 return {
                     "status": "RE",
                     "time_used": time_used,
                     "error": stderr.decode()
                 }
+
             memory_used = 0
             try:
                 stats_cmd = ["docker", "stats", "--no-stream", "--format", "{{.MemUsage}}", container_name]
@@ -233,18 +229,20 @@ CMD ["./main"]
                             memory_used = int(float(used_mem.replace("KiB", "")) / 1024)
             except:
                 pass
-            if memory_used > memory_limit:
+            if memory_used > memory_limit:  # MLE安全响应
                 return {
                     "status": "MLE",
                     "time_used": time_used,
                     "memory_used": memory_used
                 }
+
             return {
                 "status": "AC",
                 "time_used": time_used,
                 "memory_used": memory_used,
                 "output": stdout.decode()
             }
+
         except Exception as e:
             return {"status": "UNK", "error": str(e)}
         finally:
@@ -266,25 +264,18 @@ CMD ["./main"]
         judge_mode: str = "standard",
         problem_id: str = ""
     ):
-        """评测单个测试点（Docker版本）"""
         try:
-            # 创建临时目录和代码文件
             with tempfile.TemporaryDirectory() as temp_dir:
-                # 生成代码文件
                 if language == "python":
                     code_file = os.path.join(temp_dir, "main.py")
                 elif language == "cpp":
                     code_file = os.path.join(temp_dir, "main.cpp")
                 else:
                     return self._create_test_case_result("CE", input_data=input_data, expected_output=expected_output)
-                
-                with open(code_file, 'w', encoding='utf-8') as f:
+
+                with open(code_file, 'w', encoding='utf-8') as f:   # 创建代码文件
                     f.write(code)
-                
-                # 生成容器名称
-                container_name = f"{self.container_prefix}{uuid.uuid4().hex[:8]}"
-                
-                # 在Docker中运行
+                container_name = f"{self.container_prefix}{uuid.uuid4().hex[:8]}"   
                 result = await self.run_in_docker(
                     language, code_file, input_data, time_limit, memory_limit, container_name
                 )
@@ -300,11 +291,9 @@ CMD ["./main"]
                         actual_output=result.get("output", "")
                     )
                 
-                # 比较输出
                 actual_output = result["output"].rstrip()
                 expected_output = expected_output.rstrip()
                 
-                # 根据评测模式进行判断
                 if judge_mode == "spj" and problem_id:
                     # 使用SPJ脚本进行评测
                     try:
@@ -330,8 +319,7 @@ CMD ["./main"]
                                 actual_output=actual_output
                             )
                     except Exception as e:
-                        print(f"SPJ评测失败: {e}")
-                        # SPJ失败时回退到标准评测
+                        print(f"SPJ评测失败: {e}")  # SPJ失败时回退到标准评测                        
                         pass
                 
                 # 标准评测或严格评测
@@ -386,9 +374,7 @@ CMD ["./main"]
             )
     
     def _create_test_case_result(self, status: str, time_used: float = 0, memory_used: int = 0, 
-                                input_data: str = "", expected_output: str = "", actual_output: str = ""):
-        """创建测试用例结果对象"""
-        # 创建一个简单的对象，与judge.py中的TestCaseResult兼容
+                                input_data: str = "", expected_output: str = "", actual_output: str = ""):   # 创建测试用例结果对象
         class TestCaseResult:
             def __init__(self, status: str, time_used: float = 0, memory_used: int = 0, 
                          input_data: str = "", expected_output: str = "", actual_output: str = ""):
@@ -397,15 +383,13 @@ CMD ["./main"]
                 self.memory_used = memory_used
                 self.input_data = input_data
                 self.expected_output = expected_output
-                self.actual_output = actual_output
-        
+                self.actual_output = actual_output        
         return TestCaseResult(status, time_used, memory_used, input_data, expected_output, actual_output)
     
     def _normalize_output(self, output: str) -> str:
-        """标准化输出，忽略多余的空格和换行"""
         lines = output.split('\n')
         normalized_lines = []
-        for line in lines:
+        for line in lines:  
             normalized_lines.append(line.strip())  # 去除行首和行尾空格
         return '\n'.join(normalized_lines).rstrip()
     
@@ -416,8 +400,7 @@ CMD ["./main"]
         input_data: str,
         time_limit: float,
         memory_limit: int
-    ) -> Dict[str, Any]:
-        """模拟Docker运行（当Docker不可用时）"""
+    ) -> Dict[str, Any]:   # 模拟Docker运行（当Docker不可用时）
         try:
             start_time = time.time()
             
@@ -511,13 +494,11 @@ CMD ["./main"]
         except Exception as e:
             return {"status": "UNK", "error": str(e)}
     
-    async def cleanup_containers(self):
-        """清理所有评测容器"""
+    async def cleanup_containers(self):   # 清理所有评测容器
         if not getattr(self, 'docker_available', True):
-            return  # Docker不可用时无需清理
-        
+            return  
+
         try:
-            # 查找并删除所有评测容器
             list_cmd = ["docker", "ps", "-a", "--filter", f"name={self.container_prefix}", "--format", "{{.Names}}"]
             list_process = await asyncio.create_subprocess_exec(
                 *list_cmd,
@@ -533,7 +514,6 @@ CMD ["./main"]
                         await asyncio.create_subprocess_exec("docker", "rm", "-f", container.strip())
         except Exception as e:
             print(f"清理容器失败: {e}")
-
 
 # 全局Docker评测器实例
 docker_judge = DockerJudge() 

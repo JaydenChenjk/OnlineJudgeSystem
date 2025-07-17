@@ -29,7 +29,7 @@ class TestCaseResult:
 
 class Judge:
     def __init__(self):
-        self.temp_dir = tempfile.mkdtemp()
+        self.temp_dir = tempfile.mkdtemp()  # 创建临时目录
     
     async def judge_submission(self, submission_id: str) -> JudgeResult:
         """评测提交"""

@@ -1,1 +1,44 @@
-{}
+{
+  "332e9517-720a-4bd2-b957-3cbf231416ee": {
+    "submission_id": "332e9517-720a-4bd2-b957-3cbf231416ee",
+    "user_id": "a5ba6a64-6612-425b-8ef9-0c830b88e049",
+    "problem_id": "spj_test_23ae50ac",
+    "language": "python",
+    "code": "a, b = map(int, input().split())\nprint(a + b)",
+    "score": 10,
+    "counts": 10,
+    "test_cases": [
+      {
+        "test_case_id": 0,
+        "status": "AC",
+        "time_used": 0.4949960708618164,
+        "memory_used": 0,
+        "input_data": "1 2",
+        "expected_output": "3",
+        "actual_output": "3"
+      }
+    ],
+    "submit_time": "2025-07-17T20:49:29.919594"
+  },
+  "d987a44c-ad3a-4fff-814a-828d197202e2": {
+    "submission_id": "d987a44c-ad3a-4fff-814a-828d197202e2",
+    "user_id": "a5ba6a64-6612-425b-8ef9-0c830b88e049",
+    "problem_id": "spj_test_23ae50ac",
+    "language": "python",
+    "code": "a, b = map(int, input().split())\nprint(a - b)",
+    "score": 0,
+    "counts": 10,
+    "test_cases": [
+      {
+        "test_case_id": 0,
+        "status": "WA",
+        "time_used": 0.3233661651611328,
+        "memory_used": 0,
+        "input_data": "1 2",
+        "expected_output": "3",
+        "actual_output": "-1"
+      }
+    ],
+    "submit_time": "2025-07-17T20:49:32.862429"
+  }
+}
