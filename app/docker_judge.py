@@ -311,7 +311,7 @@ CMD ["./main"]
                         from .routers.spj import run_spj_script
                         spj_result = await run_spj_script(problem_id, input_data, expected_output, actual_output)
                         
-                        if spj_result.get("status") == "ACCEPTED":
+                        if spj_result.get("status") == "AC":
                             return self._create_test_case_result(
                                 status="AC",
                                 time_used=result["time_used"],

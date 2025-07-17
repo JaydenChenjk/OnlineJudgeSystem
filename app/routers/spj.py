@@ -157,6 +157,13 @@ async def run_spj_script(problem_id: str, input_data: str, expected_output: str,
         # 解析SPJ输出
         try:
             result = json.loads(stdout.decode())
+            # 兼容status字段
+            status = result.get("status", "WA").upper()
+            if status in ["ACCEPTED", "AC"]:
+                result["status"] = "AC"
+            elif status in ["WRONG_ANSWER", "WA"]:
+                result["status"] = "WA"
+            # 其他status保持原样
             return result
         except json.JSONDecodeError:
             return {

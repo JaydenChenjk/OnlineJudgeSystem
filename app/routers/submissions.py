@@ -7,8 +7,13 @@ from ..auth import require_auth, require_admin, get_current_user
 from ..judge import judge
 
 def is_testing():
-    """检测是否在测试环境中"""
-    return "PYTEST_CURRENT_TEST" in os.environ
+    import sys, os
+    # FastAPI TestClient会自动设置TESTING环境变量
+    return (
+        os.environ.get("TESTING") == "true"
+        or any("pytest" in arg for arg in sys.argv)
+        or "PYTEST_CURRENT_TEST" in os.environ
+    )
 
 router = APIRouter(prefix="/api/submissions", tags=["submissions"])
 
@@ -46,7 +51,8 @@ async def submit_solution(submission_data: SubmissionCreate, request: Request):
         )
         
         # 根据环境决定评测方式
-        if is_testing():
+        testing = is_testing()
+        if testing:
             # 测试环境中直接等待评测完成
             await judge.judge_submission(submission_id)
         else:

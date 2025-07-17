@@ -47,7 +47,7 @@ def run_spj_tests():
         # 运行SPJ功能检测
         print("2. 运行SPJ功能检测...")
         test_result = subprocess.run([
-            sys.executable, "spj_functionality_test.py"
+            sys.executable, "spj_integration_test.py"
         ], capture_output=True, text=True)
         
         # 输出测试结果
@@ -95,7 +95,7 @@ def run_single_test(test_name: str):
         # 运行指定测试
         print(f"2. 运行测试: {test_name}...")
         test_result = subprocess.run([
-            sys.executable, "spj_functionality_test.py"
+            sys.executable, "spj_integration_test.py"
         ], capture_output=True, text=True)
         
         # 输出测试结果
