@@ -1,35 +1,35 @@
 {
-  "32c1b01b-ef77-4c78-b9d8-61d4cba0f6c7": {
-    "user_id": "32c1b01b-ef77-4c78-b9d8-61d4cba0f6c7",
+  "c3d75ee6-105f-4ef8-bdc8-2bc049da5f8c": {
+    "user_id": "c3d75ee6-105f-4ef8-bdc8-2bc049da5f8c",
     "username": "admin",
-    "password_hash": "$2b$12$mYfOeIS07ShjclEME3UO.eg0u8PJpfKBgRODjHIh6xUXLOmpzhCji",
+    "password_hash": "$2b$12$MuryuHtPUiMN84C8y8X7tu9qi1WHjuE/vaJZDLWKHE2.xii4vT1nG",
     "role": "admin",
     "join_time": "2025-07-18",
     "submit_count": 0,
     "resolve_count": 0
   },
-  "42785910-66ed-4e48-b738-d7636bae9eb1": {
-    "user_id": "42785910-66ed-4e48-b738-d7636bae9eb1",
-    "username": "test_user_a45d689e",
-    "password_hash": "$2b$12$SH7vRZG6/vH3O/4lHYVHMuQcKW1PsNoam3lhXfFvW146yG/r/nWKq",
+  "6ff1ac2c-9adb-4f5d-baf2-410b1fb8247e": {
+    "user_id": "6ff1ac2c-9adb-4f5d-baf2-410b1fb8247e",
+    "username": "test_user_9c756fd0",
+    "password_hash": "$2b$12$V.nxdaKFShioZM/BsmyZAenzqoiKIHEbhFFvogEyBFVbFqAh6AZqi",
     "role": "user",
     "join_time": "2025-07-18",
     "submit_count": 0,
     "resolve_count": 0
   },
-  "b4eb878f-1273-4ad4-90ed-44a1f2ed23f9": {
-    "user_id": "b4eb878f-1273-4ad4-90ed-44a1f2ed23f9",
-    "username": "test_user_8d20f76c",
-    "password_hash": "$2b$12$tiAOOq8o9knRCcWFGutZ2Oi/sR3g87Ykj/VQvaytcc4bYznpvZpbu",
+  "a0bd136f-075a-4f20-8f7c-1678d6242a8c": {
+    "user_id": "a0bd136f-075a-4f20-8f7c-1678d6242a8c",
+    "username": "test_user_b9b1ee22",
+    "password_hash": "$2b$12$y4jy/3FmgiGgM1S0gN8LvektFT18NP6fVCihykHkbd4NFSfI0ovl.",
     "role": "user",
     "join_time": "2025-07-18",
     "submit_count": 0,
     "resolve_count": 0
   },
-  "8b4c4ef5-edec-4a04-8c54-326eead7901d": {
-    "user_id": "8b4c4ef5-edec-4a04-8c54-326eead7901d",
-    "username": "test_user_1f7dd99f",
-    "password_hash": "$2b$12$13Sr7hjOn5p7EYE9.v4w1eyQ/FH10sy85U/stt9fiZlh9X8/yEhpe",
+  "ce153ad2-b263-46f0-9796-f394a8fe8395": {
+    "user_id": "ce153ad2-b263-46f0-9796-f394a8fe8395",
+    "username": "test_user_83f6273f",
+    "password_hash": "$2b$12$E.lQE0rfu9vGcuuujEau8u8suaaFfOgOOJJeIuvUqm0ZpF1FeYv2W",
     "role": "user",
     "join_time": "2025-07-18",
     "submit_count": 0,

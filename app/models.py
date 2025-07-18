@@ -425,17 +425,14 @@ class DataStore:    # 核心数据管理模块
     def get_submission_log(self, submission_id: str) -> Optional[dict]:   # 获取提交日志
         return self.submission_logs.get(submission_id)
     
-    def set_problem_visibility(self, problem_id: str, public_cases: bool):
-        """设置题目日志可见性"""
+    def set_problem_visibility(self, problem_id: str, public_cases: bool):   # 设置题目日志可见性
         self.problem_visibility[problem_id] = {"public_cases": public_cases}
         self.save_data()
     
-    def get_problem_visibility(self, problem_id: str) -> dict:
-        """获取题目日志可见性"""
+    def get_problem_visibility(self, problem_id: str) -> dict:   # 获取题目日志可见性
         return self.problem_visibility.get(problem_id, {"public_cases": False})
     
-    def log_access(self, user_id: str, username: str, action: str, resource_id: str, resource_type: str, ip_address: str = ""):
-        """记录访问日志"""
+    def log_access(self, user_id: str, username: str, action: str, resource_id: str, resource_type: str, ip_address: str = ""):   # 记录访问日志
         log_id = str(uuid.uuid4())
         now = datetime.now().isoformat()
         
@@ -451,8 +448,7 @@ class DataStore:    # 核心数据管理模块
         }
         self.save_data()
     
-    def get_access_logs(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:
-        """获取访问日志"""
+    def get_access_logs(self, user_id: Optional[str] = None, problem_id: Optional[str] = None, page: int = 1, page_size: int = 10) -> dict:   # 获取访问日志
         all_logs = list(self.access_logs.values())
         
         # 过滤
@@ -471,8 +467,7 @@ class DataStore:    # 核心数据管理模块
             "logs": logs_page
         }
     
-    def reset_system(self):
-        """重置系统"""
+    def reset_system(self):   # 重置系统
         self.users = {}
         self.sessions = {}
         self.languages = {}
