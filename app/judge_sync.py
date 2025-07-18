@@ -16,7 +16,7 @@ def judge_submission_sync(submission_id: str):
         finally:
             loop.close()
     except Exception as e:
-        print(f"同步评测错误: {e}")
+        print(f"评测错误: {e}")
         return None
 
 
