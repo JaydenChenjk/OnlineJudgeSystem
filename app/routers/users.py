@@ -24,9 +24,8 @@ async def get_users_list(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
     request: Request = None
-):
-    """获取用户列表（仅管理员）"""
-    require_admin(request)  # 检查管理员权限
+):   # 获取用户列表（仅管理员）
+    require_admin(request)  
     
     try:
         result = data_store.get_all_users(page, page_size)
@@ -59,11 +58,9 @@ async def get_users_list(
 
 
 @router.get("/{user_id}", summary="获取用户信息")
-async def get_user_info(user_id: str, request: Request):
-    """获取用户信息"""
+async def get_user_info(user_id: str, request: Request):   # 获取用户信息
     current_user = get_current_user(request)
     
-    # 检查权限：只能查看自己的信息或管理员可以查看所有
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -97,9 +94,8 @@ async def get_user_info(user_id: str, request: Request):
 
 
 @router.put("/{user_id}/role", summary="更新用户角色")
-async def update_user_role(user_id: str, role_data: UserRoleUpdate, request: Request):
-    """更新用户角色（仅管理员）"""
-    require_admin(request)  # 检查管理员权限
+async def update_user_role(user_id: str, role_data: UserRoleUpdate, request: Request):   # 更新用户角色（仅管理员）
+    require_admin(request)  
     
     # 检查用户是否存在
     user = data_store.get_user_by_id(user_id)
@@ -120,9 +116,8 @@ async def update_user_role(user_id: str, role_data: UserRoleUpdate, request: Req
 
 
 @router.post("/admin", summary="创建管理员账户")
-async def create_admin(user_data: UserCreate, request: Request):
-    """创建管理员账户（仅管理员）"""
-    require_admin(request)  # 检查管理员权限
+async def create_admin(user_data: UserCreate, request: Request):   # 创建管理员账户（仅管理员）
+    require_admin(request)  
     
     try:
         user_id = data_store.create_user(user_data.username, user_data.password, "admin")

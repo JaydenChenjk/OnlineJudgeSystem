@@ -9,11 +9,10 @@ router = APIRouter(prefix="/api/problems", tags=["problems"])
 
 PROBLEMS_DIR = "problems"  # 题目配置文件目录
 SPJ_DIR = "spj_scripts"  # SPJ脚本存储目录
-os.makedirs(PROBLEMS_DIR, exist_ok=True)  # 确保目录存在
-os.makedirs(SPJ_DIR, exist_ok=True)  # 确保SPJ目录存在
+os.makedirs(PROBLEMS_DIR, exist_ok=True)  
+os.makedirs(SPJ_DIR, exist_ok=True)  
 
-def has_spj_script(problem_id: str) -> bool:
-    """检查题目是否有SPJ脚本"""
+def has_spj_script(problem_id: str) -> bool:    # 检查题目是否有SPJ脚本
     py_path = os.path.join(SPJ_DIR, f"{problem_id}.py")
     cpp_path = os.path.join(SPJ_DIR, f"{problem_id}.cpp")
     return os.path.exists(py_path) or os.path.exists(cpp_path)
@@ -69,8 +68,7 @@ def get_all_problem_ids() -> List[str]:
 
 
 @router.get("/", summary="获取题目列表")
-async def get_problems(request: Request):
-    """获取题目列表（需要登录）"""
+async def get_problems(request: Request):   # 获取题目列表（需要登录）
     require_auth(request)  # 需要登录
     
     try:
@@ -97,8 +95,8 @@ async def get_problems(request: Request):
 
 @router.get("/{problem_id}", summary="获取题目详情")
 async def get_problem(problem_id: str, request: Request):
-    """获取题目详情（需要登录）"""
-    require_auth(request)  # 需要登录
+    # 获取题目详情（需要登录）
+    require_auth(request)  
     
     try:
         problem = load_problem(problem_id)  # 返回完整题目信息
@@ -121,9 +119,8 @@ async def get_problem(problem_id: str, request: Request):
 
 
 @router.post("/", summary="添加题目")
-async def create_problem(problem: Problem, request: Request):
-    """添加题目（需要登录）"""
-    require_auth(request)  # 需要登录
+async def create_problem(problem: Problem, request: Request):   # 添加题目（需要登录）
+    require_auth(request)  
     
     try:
         file_path = get_problem_file_path(problem.id)
@@ -150,8 +147,7 @@ async def create_problem(problem: Problem, request: Request):
 
 
 @router.delete("/{problem_id}", summary="删除题目")
-async def delete_problem(problem_id: str, request: Request):
-    """删除题目（仅管理员）"""
+async def delete_problem(problem_id: str, request: Request):   # 删除题目（仅管理员）
     require_admin(request)  # 仅管理员可删除
     
     try:

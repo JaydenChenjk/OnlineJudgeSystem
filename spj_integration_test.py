@@ -11,11 +11,11 @@ class TestSPJIntegration:   # SPJ功能集成测试类
         problem_data = {
             "id": problem_id,
             "title": f"SPJ测试题目 - {judge_mode}",
-            "description": "计算a+b",
-            "input_description": "两个整数",
-            "output_description": "它们的和",
-            "samples": [{"input": "1 2", "output": "3"}],
-            "testcases": [{"input": "1 2", "output": "3"}],
+            "description": "计算平面直角坐标系上某点到原点距离",
+            "input_description": "两个浮点数，代表某点的x, y坐标",
+            "output_description": "该点到原点距离，保留6位小数",
+            "samples": [{"input": "3 4", "output": "5.0"}],
+            "testcases": [{"input": "3 4", "output": "5.0"}],
             "constraints": "|a|,|b| <= 10^9",
             "time_limit": 1.0,
             "memory_limit": 128,
@@ -54,21 +54,39 @@ class TestSPJIntegration:   # SPJ功能集成测试类
     @pytest.fixture
     def python_spj_script(self):   # Python SPJ脚本
         return '''#!/usr/bin/env python3
-import json
 import sys
+import json
 
 def main():
-    data = json.loads(sys.stdin.read())
-    input_data = data["input"]
-    expected_output = data["expected_output"]
-    actual_output = data["actual_output"]
-    
-    # 简单的SPJ逻辑：检查输出是否包含期望的结果
-    if expected_output.strip() in actual_output.strip():
-        result = {"status": "ACCEPTED", "score": 100, "message": "输出正确"}
-    else:
-        result = {"status": "WRONG_ANSWER", "score": 0, "message": "输出错误"}
-    
+    try:
+        # 从标准输入读取 JSON 格式的输入
+        data = json.load(sys.stdin)
+
+        input_data = data.get("input", "").strip()
+        expected_output = data.get("expected_output", "").strip()
+        actual_output = data.get("actual_output", "").strip()
+
+        # 转为浮点数列表
+        try:
+            expected = list(map(float, expected_output.split()))
+            actual = list(map(float, actual_output.split()))
+        except ValueError:
+            raise Exception("输出格式错误，无法转换为浮点数")
+
+        # 判断长度是否一致
+        if len(expected) != len(actual):
+            result = {"status": "WA", "score": 0, "message": "输出长度不一致"}
+        else:            
+            eps = 1e-5  # 允许误差
+            correct = all(abs(e - a) <= eps for e, a in zip(expected, actual))
+            if correct:
+                result = {"status": "AC", "score": 100, "message": "输出正确"}
+            else:
+                result = {"status": "WA", "score": 0, "message": "输出值不匹配"}
+
+    except Exception as e:
+        result = {"status": "SPJ_ERROR", "score": 0, "message": str(e)}
+
     print(json.dumps(result))
 
 if __name__ == "__main__":
@@ -107,6 +125,9 @@ if __name__ == "__main__":
         
         cpp_script = '''#include <iostream>
 #include <string>
+#include <sstream>
+#include <vector>
+#include <cmath>
 using namespace std;
 
 int main() {
@@ -115,11 +136,39 @@ int main() {
     getline(cin, expected);
     getline(cin, actual);
     
-    if (actual.find(expected) != string::npos) {
-        cout << "{\\"status\\":\\"ACCEPTED\\",\\"score\\":100,\\"message\\":\\"输出正确\\"}" << endl;
-    } else {
-        cout << "{\\"status\\":\\"WRONG_ANSWER\\",\\"score\\":0,\\"message\\":\\"输出错误\\"}" << endl;
+    try {
+        // 解析浮点数
+        vector<double> expected_nums, actual_nums;
+        stringstream ss1(expected), ss2(actual);
+        double num;
+        
+        while (ss1 >> num) expected_nums.push_back(num);
+        while (ss2 >> num) actual_nums.push_back(num);
+        
+        if (expected_nums.size() != actual_nums.size()) {
+            cout << "{\\"status\\":\\"WA\\",\\"score\\":0,\\"message\\":\\"输出长度不一致\\"}" << endl;
+            return 0;
+        }
+        
+        // 允许误差
+        double eps = 1e-5;  
+        bool correct = true;
+        for (size_t i = 0; i < expected_nums.size(); i++) {
+            if (abs(expected_nums[i] - actual_nums[i]) > eps) {
+                correct = false;
+                break;
+            }
+        }
+        
+        if (correct) {
+            cout << "{\\"status\\":\\"AC\\",\\"score\\":100,\\"message\\":\\"输出正确\\"}" << endl;
+        } else {
+            cout << "{\\"status\\":\\"WA\\",\\"score\\":0,\\"message\\":\\"输出值不匹配\\"}" << endl;
+        }
+    } catch (...) {
+        cout << "{\\"status\\":\\"SPJ_ERROR\\",\\"score\\":0,\\"message\\":\\"解析错误\\"}" << endl;
     }
+    
     return 0;
 }'''
         
@@ -156,12 +205,12 @@ int main() {
         response = admin_session.post(f"/api/problems/{spj_problem_id}/spj", files=files)
         assert response.status_code == 200
         
-        # 提交正确代码（应该AC）
-        correct_code = "a, b = map(int, input().split())\nprint(a + b)"
+        # 提交浮点数计算代码（应该AC，因为有误差容忍）
+        float_code = "import math\na, b = map(float, input().split())\nresult = math.sqrt(a*a + b*b)\nprint(f'{result:.6f}')"
         submission_data = {
             "problem_id": spj_problem_id,
             "language": "python",
-            "code": correct_code
+            "code": float_code
         }
         
         response = user_session.post("/api/submissions/", json=submission_data)
@@ -175,7 +224,7 @@ int main() {
         result = response.json()["data"]
         
         # 提交错误代码（应该WA）
-        wrong_code = "a, b = map(int, input().split())\nprint(a - b)"  # 减法而不是加法
+        wrong_code = "a, b = map(float, input().split())\nprint(a + b)"  # 加法而不是平方根
         submission_data["code"] = wrong_code
         
         response = user_session.post("/api/submissions/", json=submission_data)
@@ -244,11 +293,11 @@ if __name__ == "__main__":
         response = admin_session.post(f"/api/problems/{spj_problem_id}/spj", files=files)
         assert response.status_code == 200
         
-        # 测试SPJ脚本执行
+        # 测试SPJ脚本执行 - 浮点数比较
         test_data = {
-            "input_data": "1 2",
-            "expected_output": "3",
-            "actual_output": "3"
+            "input_data": "3 4",
+            "expected_output": "5.0",
+            "actual_output": "5.000001"  # 有微小误差，但应该在容忍范围内
         }
         
         response = admin_session.post(f"/api/problems/{spj_problem_id}/spj/test", data=test_data)

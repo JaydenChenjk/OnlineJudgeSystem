@@ -6,8 +6,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.post("/login", summary="用户登录")
-async def login(request: Request, login_data: UserLogin):
-    """用户登录"""
+async def login(request: Request, login_data: UserLogin):   # 用户登录
     user = data_store.authenticate_user(login_data.username, login_data.password)
     
     if not user:
@@ -31,8 +30,7 @@ async def login(request: Request, login_data: UserLogin):
 
 
 @router.post("/logout", summary="用户登出")
-async def logout(request: Request):
-    """用户登出"""
+async def logout(request: Request):   # 用户登出
     current_user = get_current_user(request)
     if not current_user:
         raise HTTPException(

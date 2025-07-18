@@ -31,8 +31,7 @@ class SessionMiddleware(BaseHTTPMiddleware):
         return response
 
 
-def require_auth(request: Request):
-    """要求用户已登录"""
+def require_auth(request: Request):     # 要求用户已登录
     if not hasattr(request.state, 'user'):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,8 +40,7 @@ def require_auth(request: Request):
     return request.state.user
 
 
-def require_admin(request: Request):
-    """要求用户是管理员"""
+def require_admin(request: Request):    # 要求用户是管理员
     user = require_auth(request)
     if user["role"] != "admin":
         raise HTTPException(
@@ -52,19 +50,16 @@ def require_admin(request: Request):
     return user
 
 
-def get_current_user(request: Request):
-    """获取当前用户（可选）"""
+def get_current_user(request: Request):     # 获取当前用户（可选）
     return getattr(request.state, 'user', None)
 
 
-def login_user(request: Request, user_id: str):
-    """登录用户"""
+def login_user(request: Request, user_id: str):     # 登录用户
     session_id = data_store.create_session(user_id)
     request.state.new_session_id = session_id
 
 
-def logout_user(request: Request):
-    """登出用户"""
+def logout_user(request: Request):      #登出用户
     if hasattr(request.state, 'session_id'):
         data_store.delete_session(request.state.session_id)
         # 清除Cookie

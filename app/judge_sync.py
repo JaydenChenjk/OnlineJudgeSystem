@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""同步评测函数，用于测试环境"""
 
 import asyncio
 from .judge import judge
 from .models import data_store
 
 
-def judge_submission_sync(submission_id: str):
-    """同步评测提交（用于测试环境）"""
+def judge_submission_sync(submission_id: str):   
     try:
         # 运行异步评测并等待完成
         loop = asyncio.new_event_loop()
@@ -22,8 +20,7 @@ def judge_submission_sync(submission_id: str):
         return None
 
 
-def ensure_judge_complete(submission_id: str, max_wait: float = 5.0):
-    """确保评测完成"""
+def ensure_judge_complete(submission_id: str, max_wait: float = 5.0):   # 确保评测完成
     import time
     start_time = time.time()
     

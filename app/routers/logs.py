@@ -7,8 +7,7 @@ router = APIRouter(prefix="/api", tags=["logs"])
 
 
 @router.get("/submissions/{submission_id}/log", summary="获取提交日志")
-async def get_submission_log(submission_id: str, request: Request):
-    """获取提交日志（需要登录）"""
+async def get_submission_log(submission_id: str, request: Request):   # 获取提交日志（需要登录）
     current_user = require_auth(request)  # 需要登录
     
     try:
@@ -78,8 +77,7 @@ async def get_submission_log(submission_id: str, request: Request):
 
 
 @router.put("/problems/{problem_id}/log_visibility", summary="配置日志可见性")
-async def configure_log_visibility(problem_id: str, visibility_data: LogVisibilityConfig, request: Request):
-    """配置日志可见性（仅管理员）"""
+async def configure_log_visibility(problem_id: str, visibility_data: LogVisibilityConfig, request: Request):   # 配置日志可见性（仅管理员）
     require_admin(request)  # 检查管理员权限
     
     try:
@@ -131,8 +129,8 @@ async def get_access_logs(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1)
 ):
-    """获取访问审计日志（仅管理员）"""
-    require_admin(request)  # 检查管理员权限
+    # 获取访问审计日志（仅管理员）
+    require_admin(request) 
     
     try:
         result = data_store.get_access_logs(user_id, problem_id, page, page_size)

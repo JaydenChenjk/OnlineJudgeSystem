@@ -6,8 +6,7 @@ router = APIRouter(prefix="/api/languages", tags=["languages"])
 
 
 @router.post("/", summary="注册新语言")
-async def register_language(language_data: Language, request: Request):
-    """注册新语言（仅管理员）"""
+async def register_language(language_data: Language, request: Request):   # 注册新语言（仅管理员）
     require_admin(request)  # 检查管理员权限
     
     try:
@@ -21,8 +20,7 @@ async def register_language(language_data: Language, request: Request):
 
 
 @router.get("/", summary="获取支持的语言列表")
-async def get_supported_languages(request: Request):
-    """获取支持的语言列表（需要登录）"""
+async def get_supported_languages(request: Request):   # 获取支持的语言列表（需要登录）
     get_current_user(request)  # 需要登录
     
     try:

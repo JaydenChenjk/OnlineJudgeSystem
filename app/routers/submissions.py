@@ -8,7 +8,6 @@ from ..judge import judge
 
 def is_testing():
     import sys, os
-    # FastAPI TestClient会自动设置TESTING环境变量
     return (
         os.environ.get("TESTING") == "true"
         or any("pytest" in arg for arg in sys.argv)
@@ -19,9 +18,8 @@ router = APIRouter(prefix="/api/submissions", tags=["submissions"])
 
 
 @router.post("/", summary="提交代码")
-async def submit_solution(submission_data: SubmissionCreate, request: Request):
-    """提交代码（需要登录）"""
-    current_user = require_auth(request)  # 需要登录
+async def submit_solution(submission_data: SubmissionCreate, request: Request):   # 提交代码（需要登录）
+    current_user = require_auth(request)  
     
     try:
         # 检查题目是否存在
@@ -77,9 +75,8 @@ async def submit_solution(submission_data: SubmissionCreate, request: Request):
 
 
 @router.get("/{submission_id}", summary="获取提交结果")
-async def get_submission_result(submission_id: str, request: Request):
-    """获取提交结果（需要登录）"""
-    current_user = require_auth(request)  # 需要登录
+async def get_submission_result(submission_id: str, request: Request):   # 获取提交结果（需要登录）
+    current_user = require_auth(request)  
     
     try:
         submission = data_store.get_submission(submission_id)
@@ -124,8 +121,7 @@ async def get_submissions_list(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1)
 ):
-    """获取提交列表（需要登录）"""
-    current_user = require_auth(request)  # 需要登录
+    current_user = require_auth(request)  
     
     # 检查参数：必须提供user_id或problem_id
     if not user_id and not problem_id:
@@ -134,7 +130,7 @@ async def get_submissions_list(
             detail={"code": 400, "msg": "必须提供user_id或problem_id"}
         )
     
-    # 检查权限：只能查看自己的提交或管理员可以查看所有
+    # 只能查看自己的提交，管理员可以查看所有
     if user_id and user_id != current_user["user_id"] and current_user["role"] != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -174,9 +170,8 @@ async def get_submissions_list(
 
 
 @router.put("/{submission_id}/rejudge", summary="重新评测")
-async def rejudge_submission(submission_id: str, request: Request):
-    """重新评测（仅管理员）"""
-    require_admin(request)  # 检查管理员权限
+async def rejudge_submission(submission_id: str, request: Request):   # 重新评测（仅管理员）
+    require_admin(request)  
     
     try:
         submission = data_store.get_submission(submission_id)

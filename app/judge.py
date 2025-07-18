@@ -31,8 +31,7 @@ class Judge:
     def __init__(self):
         self.temp_dir = tempfile.mkdtemp()  # 创建临时目录
     
-    async def judge_submission(self, submission_id: str) -> JudgeResult:
-        """评测提交"""
+    async def judge_submission(self, submission_id: str) -> JudgeResult:    # 评测提交
         try:
             submission = data_store.get_submission(submission_id)
             if not submission:
@@ -116,8 +115,7 @@ class Judge:
             data_store.update_submission(submission_id, status="error")
             return JudgeResult("error")
     
-    def _load_problem(self, problem_id: str):
-        """加载题目信息"""
+    def _load_problem(self, problem_id: str):   # 加载题目信息
         import json
         from .routers.problems import load_problem
         
@@ -138,8 +136,7 @@ class Judge:
         test_case_id: int,
         judge_mode: str = "standard",
         problem_id: str = ""
-    ):
-        """评测单个测试点（使用Docker安全评测）"""
+    ):   # 评测单个测试点（使用Docker安全评测）
         try:
             # 使用Docker评测器
             return await docker_judge.judge_test_case(
@@ -162,7 +159,7 @@ class Judge:
             )
     
     async def _compile_code(self, compile_cmd: str, code_file: str, time_limit: float) -> TestCaseResult:
-        """编译代码"""
+        # 编译代码
         try:
             # 替换命令中的文件名
             cmd = compile_cmd.replace("main.cpp", os.path.basename(code_file))
@@ -200,7 +197,7 @@ class Judge:
         judge_mode: str = "standard",
         problem_id: str = ""
     ) -> TestCaseResult:
-        """运行代码"""
+        # 运行代码
         try:
             # 替换命令中的文件名
             cmd = run_cmd.replace("main.py", os.path.basename(code_file))
@@ -349,16 +346,14 @@ class Judge:
                 actual_output=""
             )
     
-    def _normalize_output(self, output: str) -> str:
-        """标准化输出，忽略多余的空格和换行"""
+    def _normalize_output(self, output: str) -> str:    # 标准化输出，忽略多余的空格和换行
         lines = output.split('\n')
         normalized_lines = []
         for line in lines:
             normalized_lines.append(line.rstrip())
         return '\n'.join(normalized_lines).rstrip()
     
-    def cleanup(self):
-        """清理临时文件"""
+    def cleanup(self):   # 清理临时文件
         try:
             import shutil
             shutil.rmtree(self.temp_dir, ignore_errors=True)

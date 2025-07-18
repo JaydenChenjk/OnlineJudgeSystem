@@ -8,8 +8,7 @@ from .routers import auth, users, problems, admin, languages, submissions, logs,
 
 app = FastAPI(title="Online Judge System", version="1.0.0")
 
-# 添加Session中间件
-app.add_middleware(SessionMiddleware)
+app.add_middleware(SessionMiddleware)   # 添加Session中间件
     
 
 @app.get("/")
@@ -28,10 +27,8 @@ app.include_router(logs.router)
 app.include_router(import_export.router)
 app.include_router(spj.router)
 
-
-# 全局异常处理
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
+async def http_exception_handler(request, exc):     # 全局异常处理
     if hasattr(exc, 'detail') and isinstance(exc.detail, dict):
         return JSONResponse(
             status_code=exc.status_code,

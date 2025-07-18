@@ -14,8 +14,7 @@ PROBLEMS_DIR = "problems"
 
 
 @router.post("/reset/", summary="重置系统")
-async def reset_system(request: Request):
-    """重置系统（仅管理员）"""
+async def reset_system(request: Request):   # 重置系统（仅管理员）
     require_admin(request)  # 检查管理员权限
     
     # 清空所有数据文件
@@ -30,8 +29,7 @@ async def reset_system(request: Request):
 
 
 @router.get("/export/", summary="导出数据")
-async def export_data(request: Request):
-    """导出系统数据（仅管理员）"""
+async def export_data(request: Request):   # 导出系统数据（仅管理员）
     require_admin(request)  # 检查管理员权限
     
     try:
@@ -109,8 +107,7 @@ async def export_data(request: Request):
 
 
 @router.post("/import/", summary="导入数据")
-async def import_data(request: Request, file: UploadFile = File(...)):
-    """导入系统数据（仅管理员）"""
+async def import_data(request: Request, file: UploadFile = File(...)):  # 导入系统数据（仅管理员）
     require_admin(request)  # 检查管理员权限
     # 检查文件类型
     if not file.filename.endswith('.json'):
