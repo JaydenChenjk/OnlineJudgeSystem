@@ -1,6 +1,6 @@
 {
-  "id": "spj_test_0319b22c_standard",
-  "title": "SPJ测试题目 - standard",
+  "id": "spj_test_23618120",
+  "title": "SPJ测试题目 - spj",
   "description": "计算a+b",
   "input_description": "两个整数",
   "output_description": "它们的和",
@@ -24,6 +24,6 @@
   "memory_limit": 128,
   "author": "",
   "difficulty": "",
-  "judge_mode": "standard",
+  "judge_mode": "spj",
   "spj_script": ""
 }

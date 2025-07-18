@@ -17,11 +17,9 @@ os.makedirs(SPJ_DIR, exist_ok=True)
 # 允许的脚本文件扩展名
 ALLOWED_EXTENSIONS = {".py", ".cpp"}
 
-def validate_spj_script(content: str) -> bool:
-    """验证SPJ脚本内容的安全性"""
+def validate_spj_script(content: str) -> bool:   # 验证SPJ脚本内容的安全性
     content_lower = content.lower()
     
-    # 只检查最危险的函数
     extremely_dangerous = ["eval(", "exec(", "os.system(", "subprocess.call(", "subprocess.run("]
     for func in extremely_dangerous:
         if func in content_lower:
@@ -30,27 +28,22 @@ def validate_spj_script(content: str) -> bool:
     return True
 
 
-def get_spj_file_path(problem_id: str, file_ext: str = ".py") -> str:
-    """获取SPJ脚本文件路径"""
+def get_spj_file_path(problem_id: str, file_ext: str = ".py") -> str:   # 获取SPJ脚本文件路径
     return os.path.join(SPJ_DIR, f"{problem_id}{file_ext}")
 
 
-def save_spj_script(problem_id: str, content: str, file_ext: str = ".py") -> None:
-    """保存SPJ脚本"""
+def save_spj_script(problem_id: str, content: str, file_ext: str = ".py") -> None:   # 保存SPJ脚本
     file_path = get_spj_file_path(problem_id, file_ext)
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(content)
 
 
-def load_spj_script(problem_id: str) -> Optional[str]:
-    """加载SPJ脚本"""
-    # 尝试加载.py文件
+def load_spj_script(problem_id: str) -> Optional[str]:  # 加载SPJ脚本
     py_path = get_spj_file_path(problem_id, ".py")
     if os.path.exists(py_path):
         with open(py_path, 'r', encoding='utf-8') as f:
             return f.read()
     
-    # 尝试加载.cpp文件
     cpp_path = get_spj_file_path(problem_id, ".cpp")
     if os.path.exists(cpp_path):
         with open(cpp_path, 'r', encoding='utf-8') as f:
@@ -59,17 +52,14 @@ def load_spj_script(problem_id: str) -> Optional[str]:
     return None
 
 
-def delete_spj_script(problem_id: str) -> bool:
-    """删除SPJ脚本"""
+def delete_spj_script(problem_id: str) -> bool:   # 删除SPJ脚本
     deleted = False
     
-    # 尝试删除.py文件
     py_path = get_spj_file_path(problem_id, ".py")
     if os.path.exists(py_path):
         os.remove(py_path)
         deleted = True
     
-    # 尝试删除.cpp文件
     cpp_path = get_spj_file_path(problem_id, ".cpp")
     if os.path.exists(cpp_path):
         os.remove(cpp_path)
@@ -78,18 +68,15 @@ def delete_spj_script(problem_id: str) -> bool:
     return deleted
 
 
-async def run_spj_script(problem_id: str, input_data: str, expected_output: str, actual_output: str) -> dict:
-    """运行SPJ脚本进行评测"""
+async def run_spj_script(problem_id: str, input_data: str, expected_output: str, actual_output: str) -> dict:   # 运行SPJ脚本进行评测
     script_content = load_spj_script(problem_id)
     if not script_content:
         raise Exception("SPJ脚本不存在")
     
-    # 确定脚本类型和文件扩展名
     py_path = get_spj_file_path(problem_id, ".py")
     cpp_path = get_spj_file_path(problem_id, ".cpp")
     
     if os.path.exists(py_path):
-        # Python脚本
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
             f.write(script_content)
             script_file = f.name
@@ -139,7 +126,7 @@ async def run_spj_script(problem_id: str, input_data: str, expected_output: str,
             })
             input_bytes = input_json.encode()
         else:
-            # C++脚本使用简单文本格式
+            # C++脚本使用文本格式
             input_text = f"{input_data}\n{expected_output}\n{actual_output}\n"
             input_bytes = input_text.encode()
         
@@ -198,13 +185,10 @@ async def run_spj_script(problem_id: str, input_data: str, expected_output: str,
         except:
             pass
 
-# 上传SPJ脚本：POST /api/problems/{problem_id}/spj
 @router.post("/{problem_id}/spj")
-async def upload_spj_script(problem_id: str, file: UploadFile = File(...), request: Request = None):
-    """上传SPJ脚本（仅管理员）"""
+async def upload_spj_script(problem_id: str, file: UploadFile = File(...), request: Request = None):   # 上传SPJ脚本
     require_admin(request)
     
-    # 检查文件扩展名
     file_ext = os.path.splitext(file.filename)[1].lower()
     if file_ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -240,10 +224,8 @@ async def upload_spj_script(problem_id: str, file: UploadFile = File(...), reque
         )
 
 
-# 删除SPJ脚本：DELETE /api/problems/{problem_id}/spj
 @router.delete("/{problem_id}/spj")
-async def delete_spj_script_endpoint(problem_id: str, request: Request = None):
-    """删除SPJ脚本（仅管理员）"""
+async def delete_spj_script_endpoint(problem_id: str, request: Request = None):   # 删除SPJ脚本
     require_admin(request)
     
     if delete_spj_script(problem_id):
@@ -262,11 +244,9 @@ async def upload_spj_text(
     script_content: str = Form(...),
     request: Request = None
 ):
-    """上传SPJ脚本文本内容（仅管理员）"""
     require_admin(request)
     
-    # 验证脚本内容安全性
-    if not validate_spj_script(script_content):
+    if not validate_spj_script(script_content):   # 验证脚本内容安全性
         raise HTTPException(
             status_code=400,
             detail={"code": 400, "msg": "脚本内容包含危险操作，请检查后重新上传"}
@@ -284,8 +264,7 @@ async def upload_spj_text(
 
 
 @router.get("/{problem_id}/spj", summary="获取SPJ脚本")
-async def get_spj_script(problem_id: str, request: Request = None):
-    """获取SPJ脚本（仅管理员）"""
+async def get_spj_script(problem_id: str, request: Request = None):   # 获取SPJ脚本
     require_admin(request)
     
     script_content = load_spj_script(problem_id)
@@ -299,14 +278,14 @@ async def get_spj_script(problem_id: str, request: Request = None):
 
 
 @router.post("/{problem_id}/spj/test", summary="测试SPJ脚本")
-async def test_spj_script(
+async def test_spj_script(  # 测试SPJ脚本
     problem_id: str,
     input_data: str = Form(...),
     expected_output: str = Form(...),
     actual_output: str = Form(...),
     request: Request = None
 ):
-    """测试SPJ脚本（仅管理员）"""
+    
     require_admin(request)
     
     try:

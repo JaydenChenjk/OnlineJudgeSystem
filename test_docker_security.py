@@ -93,9 +93,7 @@ int main() {
         for cmd in dangerous_params:
             assert not docker_judge.validate_command(cmd), f"应该拒绝危险参数: {cmd}"
     
-    def test_dockerfile_creation(self, docker_judge, temp_code_files):
-        """测试Dockerfile创建"""
-        # 测试Python Dockerfile
+    def test_dockerfile_creation(self, docker_judge, temp_code_files):   # 测试Dockerfile创建
         python_dockerfile = docker_judge.create_dockerfile(
             "python",
             temp_code_files["python"],
@@ -133,8 +131,7 @@ int main() {
             os.remove(cpp_dockerfile)
     
     @pytest.mark.asyncio
-    async def test_docker_sandbox_isolation(self, docker_judge, temp_code_files):
-        """测试Docker沙箱隔离"""
+    async def test_docker_sandbox_isolation(self, docker_judge, temp_code_files):   # 测试Docker沙箱隔离
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过沙箱测试")
         
@@ -165,18 +162,15 @@ int main() {
         assert "Hello, World!" in result["output"]
     
     @pytest.mark.asyncio
-    async def test_memory_time_limits(self, docker_judge):
-        """测试内存和时间限制"""
+    async def test_memory_time_limits(self, docker_judge):  # 测试内存和时间限制
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过限制测试")
         
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # 测试内存限制 - 创建会消耗大量内存的代码
+        with tempfile.TemporaryDirectory() as temp_dir:            
             memory_test_code = """
 import sys
 import array
 
-# 尝试分配超过限制的内存
 try:
     # 尝试分配200MB内存（超过128MB限制）
     large_array = array.array('B', [0] * (200 * 1024 * 1024))
@@ -199,13 +193,11 @@ except MemoryError:
             
             # 应该因为内存超限而失败
             assert result["status"] in ["MLE", "RE"]
-            
-            # 测试时间限制 - 创建会超时的代码
-            timeout_test_code = """
+                        
+            timeout_test_code = """     
 import time
 import sys
 
-# 尝试运行超过时间限制
 time.sleep(10)  # 睡眠10秒，超过5秒限制
 print("Should not reach here")
 """
@@ -226,8 +218,7 @@ print("Should not reach here")
             assert result["status"] == "TLE"
     
     @pytest.mark.asyncio
-    async def test_security_restrictions(self, docker_judge):
-        """测试安全限制"""
+    async def test_security_restrictions(self, docker_judge):   # 测试安全限制
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过安全测试")
 
@@ -263,8 +254,7 @@ except Exception as e:
             assert "Network access blocked" in result["output"] or "Network access result: 101" in result["output"]
     
     @pytest.mark.asyncio
-    async def test_malicious_code_prevention(self, docker_judge):
-        """测试恶意代码防护"""
+    async def test_malicious_code_prevention(self, docker_judge):   # 测试恶意代码防护
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过恶意代码测试")
 
@@ -309,13 +299,11 @@ except Exception as e:
                    "Dangerous subprocess result: 1" in result["output"])
     
     @pytest.mark.asyncio
-    async def test_normal_code_execution(self, docker_judge):
-        """测试正常代码执行"""
+    async def test_normal_code_execution(self, docker_judge):   # 测试正常代码执行
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过正常代码测试")
         
         with tempfile.TemporaryDirectory() as temp_dir:
-            # 测试正常Python代码
             normal_python_code = """
 # 正常计算代码
 a = 10
@@ -350,7 +338,6 @@ print(text.lower())
             assert "Count: 0" in result["output"]
             assert "HELLO, DOCKER SECURITY!" in result["output"]
             
-            # 测试正常C++代码
             normal_cpp_code = """
 #include <iostream>
 #include <string>
@@ -393,15 +380,13 @@ int main() {
             assert "Length: 13" in result["output"]
     
     @pytest.mark.asyncio
-    async def test_input_output_handling(self, docker_judge):
-        """测试输入输出处理"""
+    async def test_input_output_handling(self, docker_judge):   # 测试输入输出处理
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过IO测试")
         
         with tempfile.TemporaryDirectory() as temp_dir:
-            # 测试Python输入输出
+            
             io_python_code = """
-# 读取输入并处理
 input_data = input()
 numbers = list(map(int, input_data.split()))
 total = sum(numbers)
@@ -432,7 +417,7 @@ for i in range(3):
             assert "Line 2: World" in result["output"]
             assert "Line 3: Test" in result["output"]
             
-            # 测试C++输入输出
+            
             io_cpp_code = """
 #include <iostream>
 #include <string>
@@ -478,8 +463,7 @@ int main() {
             assert "Line 2: Second line" in result["output"]
     
     @pytest.mark.asyncio
-    async def test_judge_test_case_integration(self, docker_judge):
-        """测试完整的评测集成"""
+    async def test_judge_test_case_integration(self, docker_judge):   # 测试完整的评测集成
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过集成测试")
         
@@ -527,8 +511,7 @@ int main() {
         assert result.expected_output == "Hello, World!"
     
     @pytest.mark.asyncio
-    async def test_cleanup_containers(self, docker_judge):
-        """测试容器清理"""
+    async def test_cleanup_containers(self, docker_judge):   # 测试容器清理
         if not docker_judge.docker_available:
             pytest.skip("Docker不可用，跳过清理测试")
         
@@ -559,9 +542,7 @@ int main() {
                 capture_output=True,
                 text=True,
                 timeout=5
-            )
-            
-            # 应该没有评测容器残留
+            )            
             assert not result.stdout.strip() or "oj_judge_" not in result.stdout
 
 
